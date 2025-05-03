@@ -172,6 +172,13 @@ fun DetailsScreen(productId: String) {
     ) {
         Text(text = product.name, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB22222))
         Spacer(modifier = Modifier.height(16.dp))
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = "Image produit",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = product.description)
         Text(text = "Prix: ${product.price} €", fontSize = 20.sp, fontWeight = FontWeight.Medium)
