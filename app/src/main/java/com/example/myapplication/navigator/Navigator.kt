@@ -2,9 +2,12 @@ package com.example.myapplication.navigator
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,13 +35,11 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Routes.Home) {
-
         composable(Routes.Home) {
             HomeScreen(onNavigateToDetails = { productId ->
                 navController.navigate("${Routes.ProductDetails}/$productId")
             })
         }
-
         composable(
             "${Routes.ProductDetails}/{productId}",
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
@@ -61,47 +62,71 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
     @OptIn(ExperimentalMaterial3Api::class)
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("🌸 Flower Store", color = Color(0xFFB22222)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF5F5F5)
-                ),
-                actions = {
-                    IconButton(onClick = {}) {
-                        Text("⋮", color = Color(0xFFB22222))
-                    }
-                }
-            )
+            Column {
+                TopAppBar(
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("🌸 Zahrae", color = Color(0xFFFF69B4), fontSize = 20.sp)
+
+
+                            OutlinedTextField(
+                                value = "",
+                                onValueChange = {},
+                                placeholder = { Text("Rechercher...") },
+                                modifier = Modifier
+                                    .fillMaxWidth(0.6f)
+                                    .padding(8.dp)
+                                    .background(Color.Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(12.dp)) // خلفية رمادية
+                                    .border(1.dp, Color(0xFFFF69B4), RoundedCornerShape(12.dp)) // حد وردي
+                            )
+
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color(0xFFFF69B4))
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFE4E1)) // rose pâle
+                )
+
+            }
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFE0E0E0))
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                Text("🏠")
-                Text("❤️")
-                Text("🧑")
-                Text("🛒")
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Text("🏠", fontSize = 20.sp)
+                    Text("❤️", fontSize = 20.sp)
+                    Text("🧑", fontSize = 20.sp)
+                    Text("🛒", fontSize = 20.sp)
+                }
+
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(Color.Black)
+                )
             }
-        }
+        },
+        containerColor = Color(0xFFFFE4E1)
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color.White)
                 .padding(8.dp)
         ) {
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("Rechercher...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            )
-
             Column {
                 for (i in products.chunked(2)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -117,9 +142,10 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(8.dp)
+                                    .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
                                     .clickable { onNavigateToDetails(product.id) },
                                 shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
                                 elevation = CardDefaults.cardElevation(4.dp)
                             ) {
                                 Column(
@@ -163,24 +189,26 @@ fun DetailsScreen(productId: String) {
         else -> R.drawable.img1
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = product.name, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB22222))
-        Spacer(modifier = Modifier.height(16.dp))
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = "Image produit",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = product.description)
-        Text(text = "Prix: ${product.price} €", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(product.name, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF69B4))
+            Text(product.description)
+            Text("Prix: ${product.price} €", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }
