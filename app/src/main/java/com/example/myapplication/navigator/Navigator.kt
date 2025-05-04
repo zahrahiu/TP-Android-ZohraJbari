@@ -56,112 +56,101 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
         Product("1", "Rose rouge", "Une rose magnifique", 10.0),
         Product("2", "Tulipe blanche", "Belle tulipe blanche", 12.0),
         Product("3", "Tournesol", "Tournesol éclatant", 8.5),
-        Product("4", "Lys rose", "Délicat lys", 15.0)
+        Product("4", "Lys rose", "Délicat lys", 15.0),
+        Product("5", "Orchidée", "Orchidée exotique", 20.0),
+        Product("6", "Violette", "Petite violette mignonne", 5.0),
+
     )
 
     @OptIn(ExperimentalMaterial3Api::class)
     Scaffold(
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("🌸 Zahrae", color = Color(0xFFFF69B4), fontSize = 20.sp)
-
-
-                            OutlinedTextField(
-                                value = "",
-                                onValueChange = {},
-                                placeholder = { Text("Rechercher...") },
-                                modifier = Modifier
-                                    .fillMaxWidth(0.6f)
-                                    .padding(8.dp)
-                                    .background(Color.Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(12.dp)) // خلفية رمادية
-                                    .border(1.dp, Color(0xFFFF69B4), RoundedCornerShape(12.dp)) // حد وردي
-                            )
-
-                            IconButton(onClick = {}) {
-                                Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color(0xFFFF69B4))
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFE4E1)) // rose pâle
+            TopAppBar(
+                title = {
+                    Text(
+                        "🌸زهراء🌸",
+                        color = Color(0xFFD81B60),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    )
+                },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color(0xFFD81B60))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFEBEE)
                 )
-
-            }
+            )
         },
         bottomBar = {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Text("🏠", fontSize = 20.sp)
-                    Text("❤️", fontSize = 20.sp)
-                    Text("🧑", fontSize = 20.sp)
-                    Text("🛒", fontSize = 20.sp)
-                }
-
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .background(Color.Black)
-                )
+            NavigationBar(
+                containerColor = Color.White
+            ) {
+                NavigationBarItem(selected = true, onClick = {}, icon = { Text("🏠", fontSize = 20.sp) }, label = { Text("Accueil") })
+                NavigationBarItem(selected = false, onClick = {}, icon = { Text("❤️", fontSize = 20.sp) }, label = { Text("Favoris") })
+                NavigationBarItem(selected = false, onClick = {}, icon = { Text("🧑", fontSize = 20.sp) }, label = { Text("Profil") })
+                NavigationBarItem(selected = false, onClick = {}, icon = { Text("🛒", fontSize = 20.sp) }, label = { Text("Panier") })
             }
         },
-        containerColor = Color(0xFFFFE4E1)
+        containerColor = Color(0xFFFFF1F3)
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(Color.White)
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
-            Column {
-                for (i in products.chunked(2)) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        for (product in i) {
-                            val imageRes = when (product.id) {
-                                "1" -> R.drawable.img1
-                                "2" -> R.drawable.img2
-                                "3" -> R.drawable.img3
-                                "4" -> R.drawable.img4
-                                else -> R.drawable.img1
-                            }
-                            Card(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(8.dp)
-                                    .border(1.dp, Color.Black, RoundedCornerShape(12.dp))
-                                    .clickable { onNavigateToDetails(product.id) },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0)),
-                                elevation = CardDefaults.cardElevation(4.dp)
+            OutlinedTextField(
+                value = "",
+                onValueChange = {},
+                placeholder = { Text("🔍 Rechercher une fleur...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(20.dp))
+                    .border(1.dp, Color(0xFFD81B60), RoundedCornerShape(20.dp))
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            for (i in products.chunked(2)) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    for (product in i) {
+                        val imageRes = when (product.id) {
+                            "1" -> R.drawable.img1
+                            "2" -> R.drawable.img2
+                            "3" -> R.drawable.img3
+                            "4" -> R.drawable.img4
+                            "5" -> R.drawable.img5
+                            "6" -> R.drawable.img6
+
+                            else -> R.drawable.img1
+                        }
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(4.dp)
+                                .clickable { onNavigateToDetails(product.id) },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(12.dp)
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.padding(8.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = imageRes),
-                                        contentDescription = "Image fleur",
-                                        modifier = Modifier
-                                            .height(100.dp)
-                                            .fillMaxWidth()
-                                    )
-                                    Text(product.name, fontWeight = FontWeight.Bold)
-                                    Text("${product.price} €", fontSize = 14.sp)
-                                }
+                                Image(
+                                    painter = painterResource(id = imageRes),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .height(120.dp)
+                                        .fillMaxWidth()
+                                        .background(Color(0xFFFFF1F3), shape = RoundedCornerShape(12.dp))
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(product.name, fontWeight = FontWeight.Bold, color = Color(0xFF880E4F))
                             }
                         }
                     }
@@ -178,6 +167,9 @@ fun DetailsScreen(productId: String) {
         "2" -> Product("2", "Tulipe blanche", "Belle tulipe blanche", 12.0)
         "3" -> Product("3", "Tournesol", "Tournesol éclatant", 8.5)
         "4" -> Product("4", "Lys rose", "Délicat lys", 15.0)
+        "5" -> Product("5", "Orchidée", "Orchidée exotique", 20.0)
+        "6" -> Product("6", "Violette", "Petite violette mignonne", 5.0)
+
         else -> Product("0", "Inconnu", "Pas de description", 0.0)
     }
 
@@ -186,6 +178,9 @@ fun DetailsScreen(productId: String) {
         "2" -> R.drawable.img2
         "3" -> R.drawable.img3
         "4" -> R.drawable.img4
+        "5" -> R.drawable.img5
+        "6" -> R.drawable.img6
+
         else -> R.drawable.img1
     }
 
