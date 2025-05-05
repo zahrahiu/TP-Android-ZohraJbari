@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,14 +54,14 @@ fun AppNavigation() {
 @Composable
 fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
     val products = listOf(
-        Product("1", "Rose rouge", "Une rose magnifique", 10.0),
-        Product("2", "Tulipe blanche", "Belle tulipe blanche", 12.0),
-        Product("3", "Tournesol", "Tournesol éclatant", 8.5),
-        Product("4", "Lys rose", "Délicat lys", 15.0),
-        Product("5", "Orchidée", "Orchidée exotique", 20.0),
-        Product("6", "Violette", "Petite violette mignonne", 5.0),
-
+        Product("1", "Sunflower", "A radiant sunflower, symbolizing happiness and positivity with its bright yellow petals.", 100.0, 8),
+        Product("2", "Lily", "A delicate lily that represents purity, renewal, and refined beauty.", 120.0, 14),
+        Product("3", "Hibiscus", "A vibrant hibiscus known for its tropical charm and bold colors.", 85.0, 20),
+        Product("4", "Tulip", "A graceful tulip, perfect for expressing elegance and affection.", 150.0, 5),
+        Product("5", "Pansy", "A charming pansy with velvety petals, symbolizing thoughtful remembrance.", 200.0, 17),
+        Product("6", "Lavender", "Fragrant lavender, soothing and calming, ideal for peace and relaxation.", 50.0, 9)
     )
+
 
     @OptIn(ExperimentalMaterial3Api::class)
     Scaffold(
@@ -119,12 +120,12 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (product in i) {
                         val imageRes = when (product.id) {
-                            "1" -> R.drawable.img1
-                            "2" -> R.drawable.img2
-                            "3" -> R.drawable.img3
-                            "4" -> R.drawable.img4
-                            "5" -> R.drawable.img5
-                            "6" -> R.drawable.img6
+                            "1" -> R.drawable.sunflawer
+                            "2" -> R.drawable.lily
+                            "3" -> R.drawable.hibiscus
+                            "4" -> R.drawable.tulip
+                            "5" -> R.drawable.pansy
+                            "6" -> R.drawable.lavender
 
                             else -> R.drawable.img1
                         }
@@ -159,51 +160,70 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
         }
     }
 }
-
 @Composable
 fun DetailsScreen(productId: String) {
     val product = when (productId) {
-        "1" -> Product("1", "Rose rouge", "Une rose magnifique", 10.0)
-        "2" -> Product("2", "Tulipe blanche", "Belle tulipe blanche", 12.0)
-        "3" -> Product("3", "Tournesol", "Tournesol éclatant", 8.5)
-        "4" -> Product("4", "Lys rose", "Délicat lys", 15.0)
-        "5" -> Product("5", "Orchidée", "Orchidée exotique", 20.0)
-        "6" -> Product("6", "Violette", "Petite violette mignonne", 5.0)
-
-        else -> Product("0", "Inconnu", "Pas de description", 0.0)
+        "1" -> Product("1", "Sunflower", "A radiant sunflower, symbolizing happiness and positivity with its bright yellow petals.", 100.0, 8)
+        "2" -> Product("2", "Lily", "A delicate lily that represents purity, renewal, and refined beauty.", 120.0, 14)
+        "3" -> Product("3", "Hibiscus", "A vibrant hibiscus known for its tropical charm and bold colors.", 85.0, 20)
+        "4" -> Product("4", "Tulip", "A graceful tulip, perfect for expressing elegance and affection.", 150.0, 5)
+        "5" -> Product("5", "Pansy", "A charming pansy with velvety petals, symbolizing thoughtful remembrance.", 200.0, 17)
+        "6" -> Product("6", "Lavender", "Fragrant lavender, soothing and calming, ideal for peace and relaxation.", 50.0, 9)
+        else -> Product("0", "Unknown", "No description available.", 0.0, 0)
     }
+
 
     val imageRes = when (product.id) {
-        "1" -> R.drawable.img1
-        "2" -> R.drawable.img2
-        "3" -> R.drawable.img3
-        "4" -> R.drawable.img4
-        "5" -> R.drawable.img5
-        "6" -> R.drawable.img6
-
+        "1" -> R.drawable.sunflawer
+        "2" -> R.drawable.lily
+        "3" -> R.drawable.hibiscus
+        "4" -> R.drawable.tulip
+        "5" -> R.drawable.pansy
+        "6" -> R.drawable.lavender
         else -> R.drawable.img1
     }
+
+    val quantityColor = if (product.quantity > 10) Color(0xFF2E7D32) else Color.Red
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .background(Color(0xFFFFF1F3))
+            .padding(16.dp)
     ) {
         Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White, shape = RoundedCornerShape(24.dp))
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 painter = painterResource(id = imageRes),
                 contentDescription = null,
                 modifier = Modifier
+                    .height(220.dp)
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp))
             )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(product.name, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD81B60))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(product.description, fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(product.name, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF69B4))
-            Text(product.description)
-            Text("Prix: ${product.price} €", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+            Text("Prix : ${product.price} DH", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF616161))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Quantité disponible : ${product.quantity}", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = quantityColor)
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(
+                onClick = { /* TODO: Ajouter au panier */ },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ajouter au panier", color = Color.White, fontSize = 16.sp)
+            }
         }
     }
 }
