@@ -46,10 +46,16 @@ fun AppNavigation(viewModel: ProductViewModel) {
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId") ?: ""
-            DetailsScreen(productId = productId)
+            val product = viewModel.getProductById(productId)
+            if (product != null) {
+                DetailsScreen(product = product)
+            } else {
+                Text("Produit introuvable")
+            }
         }
     }
 }
+
 
 /* Deprecated */
 @Composable
