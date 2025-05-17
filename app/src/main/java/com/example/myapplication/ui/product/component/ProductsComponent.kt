@@ -9,16 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.Entities.Product
 
-
 @Composable
 fun ProductsList(products: List<Product>, onNavigateToDetails: (String) -> Unit) {
-    LazyColumn (
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
-    ){
+    ) {
         items(products) { product ->
-            ProductItem(product, onNavigateToDetails)
+            ProductItem(product = product, onNavigateToDetails = { onNavigateToDetails(product.id) })
         }
     }
 }

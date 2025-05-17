@@ -30,7 +30,7 @@ class ProductViewModel: ViewModel() {
             _state.value = ProductViewState(isLoading = false, products = products)
         } catch (e: Exception) {
             _state.value =
-                ProductViewState(isLoading = false, error = e.message ?: "Error fetching products")
+                ProductViewState(isLoading = false, error = e.message ?: "Product introuvable")
         }
     }
 }
