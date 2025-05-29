@@ -12,12 +12,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     @Provides
-    fun provideBaseUrl(): String = ""
+    fun provideBaseUrl(): String = "https://raw.githubusercontent.com/zahrahiu/TP-Android-ZohraJbari/main/app/public/products-api/"
 
     @Provides
     @Singleton

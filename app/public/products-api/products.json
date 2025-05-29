@@ -1,7 +1,7 @@
 [
   {
     "productID": "FL001",
-    "productTitle": "Bouquet de Roses Rouges",
+    "productTitle": "hibiscus",
     "productDescription": "Un magnifique bouquet de 12 roses rouges pour exprimer l'amour.",
     "productImage": "hibiscus.jpg",
     "quantity": "8",
@@ -9,7 +9,7 @@
   },
   {
     "productID": "FL002",
-    "productTitle": "Tulipes Multicolores",
+    "productTitle": "lavender",
     "productDescription": "Des tulipes fraîches et colorées, parfaites pour égayer une journée.",
     "productImage": "lavender.jpg",
     "quantity": "3",
@@ -17,7 +17,7 @@
   },
   {
     "productID": "FL003",
-    "productTitle": "Orchidée Élégante",
+    "productTitle": "lily",
     "productDescription": "Une orchidée blanche en pot, symbole de pureté et d'élégance.",
     "productImage": "lily.jpg",
     "quantity": "11",
@@ -25,7 +25,7 @@
   },
   {
     "productID": "FL004",
-    "productTitle": "Bouquet Printanier",
+    "productTitle": "pansy",
     "productDescription": "Un mélange vibrant de fleurs printanières pour toutes les occasions.",
     "productImage": "pansy",
     "quantity": "1",
