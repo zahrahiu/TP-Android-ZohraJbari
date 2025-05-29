@@ -3,6 +3,7 @@ package com.example.myapplication.ui.product.component
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,10 +18,12 @@ import com.example.myapplication.data.Entities.Product
 fun ProductsList(products: List<Product>, onNavigateToDetails: (String) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(8.dp),
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        contentPadding = PaddingValues(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(products) { product ->
             ProductItem(product = product) {

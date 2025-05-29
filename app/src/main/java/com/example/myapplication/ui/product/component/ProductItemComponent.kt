@@ -1,17 +1,17 @@
 package com.example.myapplication.ui.product.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,31 +33,35 @@ fun ProductItem(product: Product, onNavigateToDetails: () -> Unit) {
 
     Card(
         modifier = Modifier
-            .padding(8.dp)
             .fillMaxWidth()
+            .aspectRatio(1f) // باش تكون مربعة تقريبا
             .clickable { onNavigateToDetails() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF6F0)),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(12.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
                 painter = painterResource(id = imageRes),
                 contentDescription = product.name,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .height(120.dp)
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFF1F3), shape = RoundedCornerShape(12.dp))
+                    .size(90.dp)
+                    .clip(CircleShape)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = product.name,
-                fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = Color(0xFF880E4F)
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF5D4037),
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     }

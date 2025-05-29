@@ -1,0 +1,34 @@
+[
+  {
+    "productID": "FL001",
+    "productTitle": "Bouquet de Roses Rouges",
+    "productDescription": "Un magnifique bouquet de 12 roses rouges pour exprimer l'amour.",
+    "productImage": "hibiscus.jpg",
+    "quantity": "8",
+    "prouctPrice": "250 DH"
+  },
+  {
+    "productID": "FL002",
+    "productTitle": "Tulipes Multicolores",
+    "productDescription": "Des tulipes fraîches et colorées, parfaites pour égayer une journée.",
+    "productImage": "lavender.jpg",
+    "quantity": "3",
+    "prouctPrice": "200 DH"
+  },
+  {
+    "productID": "FL003",
+    "productTitle": "Orchidée Élégante",
+    "productDescription": "Une orchidée blanche en pot, symbole de pureté et d'élégance.",
+    "productImage": "lily.jpg",
+    "quantity": "11",
+    "prouctPrice": "300 DH"
+  },
+  {
+    "productID": "FL004",
+    "productTitle": "Bouquet Printanier",
+    "productDescription": "Un mélange vibrant de fleurs printanières pour toutes les occasions.",
+    "productImage": "pansy",
+    "quantity": "1",
+    "prouctPrice": "180 DH"
+  }
+]

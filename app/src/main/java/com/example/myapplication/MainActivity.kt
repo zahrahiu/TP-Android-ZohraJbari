@@ -21,8 +21,9 @@ import com.example.emtyapp.nav.AppNavigation
 import com.example.myapplication.ui.product.ProductViewModel
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel:ProductViewModel by viewModels<ProductViewModel>()
