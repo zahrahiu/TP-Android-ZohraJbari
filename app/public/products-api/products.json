@@ -5,7 +5,10 @@
     "productDescription": "Un magnifique bouquet de 12 roses rouges pour exprimer l'amour.",
     "productImage": "hibiscus.jpg",
     "quantity": "8",
-    "prouctPrice": "250 DH"
+    "productPrice": "250 DH",
+    "type": "HIBISCUS",
+    "colors": ["RED", "PINK"],
+    "occasions": ["LOVE", "ANNIVERSARY"]
   },
   {
     "productID": "FL002",
@@ -13,7 +16,10 @@
     "productDescription": "Des tulipes fraîches et colorées, parfaites pour égayer une journée.",
     "productImage": "lavender.jpg",
     "quantity": "3",
-    "prouctPrice": "200 DH"
+    "productPrice": "200 DH",
+    "type": "LAVENDER",
+    "colors": ["PURPLE"],
+    "occasions": ["THANKS", "BIRTHDAY"]
   },
   {
     "productID": "FL003",
@@ -21,7 +27,10 @@
     "productDescription": "Une orchidée blanche en pot, symbole de pureté et d'élégance.",
     "productImage": "lily.jpg",
     "quantity": "11",
-    "prouctPrice": "300 DH"
+    "productPrice": "300 DH",
+    "type": "LILY",
+    "colors": ["WHITE"],
+    "occasions": ["WEDDING", "ANNIVERSARY"]
   },
   {
     "productID": "FL004",
@@ -29,42 +38,53 @@
     "productDescription": "Un mélange vibrant de fleurs printanières pour toutes les occasions.",
     "productImage": "img8.jpg",
     "quantity": "1",
-    "prouctPrice": "180 DH"
+    "productPrice": "180 DH",
+    "type": "PANSY",
+    "colors": ["MULTICOLOR"],
+    "occasions": ["BIRTHDAY", "THANKS"]
+  },
+  {
+    "productID": "FL005",
+    "productTitle": "rose",
+    "productDescription": "Bouquet classique de 20 roses rouges pour المناسبات الرومانسية.",
+    "productImage": "img1.jpg",
+    "quantity": "6",
+    "productPrice": "320 DH",
+    "type": "ROSE",
+    "colors": ["RED"],
+    "occasions": ["LOVE", "WEDDING"]
+  },
+  {
+    "productID": "FL006",
+    "productTitle": "tulip",
+    "productDescription": "15 tulipes multicolores كتضوي أي فضاء ببهجتها.",
+    "productImage": "img2.jpg",
+    "quantity": "10",
+    "productPrice": "270 DH",
+    "type": "TULIP",
+    "colors": ["MULTICOLOR"],
+    "occasions": ["BIRTHDAY", "THANKS"]
+  },
+  {
+    "productID": "FL007",
+    "productTitle": "orchid",
+    "productDescription": "Orchidée violette فـ گصيص أنيق، كتعيش مدة طويلة وكتعطي لمسة راقية.",
+    "productImage": "img3.jpg",
+    "quantity": "4",
+    "productPrice": "350 DH",
+    "type": "ORCHID",
+    "colors": ["PURPLE"],
+    "occasions": ["WEDDING", "ANNIVERSARY"]
+  },
+  {
+    "productID": "FL008",
+    "productTitle": "daisy",
+    "productDescription": "Arrangement de marguerites بيضين وصفرين كيضفو حيوية ولطف.",
+    "productImage": "img4.jpg",
+    "quantity": "12",
+    "productPrice": "190 DH",
+    "type": "DAISY",
+    "colors": ["WHITE", "YELLOW"],
+    "occasions": ["APOLOGY", "THANKS"]
   }
-  ,
-
-    {
-      "productID": "FL005",
-      "productTitle": "rose",
-      "productDescription": "Bouquet classique de 20 roses rouges pour المناسبات الرومانسية.",
-      "productImage": "img1.jpg",
-      "quantity": "6",
-      "prouctPrice": "320 DH"
-    },
-    {
-      "productID": "FL006",
-      "productTitle": "tulip",
-      "productDescription": "15 tulipes multicolores كتضوي أي فضاء ببهجتها.",
-      "productImage": "img2.jpg",
-      "quantity": "10",
-      "prouctPrice": "270 DH"
-    },
-    {
-      "productID": "FL007",
-      "productTitle": "orchid",
-      "productDescription": "Orchidée violette فـ گصيص أنيق، كتعيش مدة طويلة وكتعطي لمسة راقية.",
-      "productImage":"img3.jpg",
-      "quantity": "4",
-      "prouctPrice": "350 DH"
-    },
-    {
-      "productID": "FL008",
-      "productTitle": "daisy",
-      "productDescription": "Arrangement de marguerites بيضين وصفرين كيضفو حيوية ولطف.",
-      "productImage": "img4.jpg",
-      "quantity": "12",
-      "prouctPrice": "190 DH"
-    }
-
-
 ]
