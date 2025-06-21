@@ -27,8 +27,44 @@
     "productID": "FL004",
     "productTitle": "pansy",
     "productDescription": "Un mélange vibrant de fleurs printanières pour toutes les occasions.",
-    "productImage": "pansy",
+    "productImage": "img8.jpg",
     "quantity": "1",
     "prouctPrice": "180 DH"
   }
+  ,
+
+    {
+      "productID": "FL005",
+      "productTitle": "rose",
+      "productDescription": "Bouquet classique de 20 roses rouges pour المناسبات الرومانسية.",
+      "productImage": "img1.jpg",
+      "quantity": "6",
+      "prouctPrice": "320 DH"
+    },
+    {
+      "productID": "FL006",
+      "productTitle": "tulip",
+      "productDescription": "15 tulipes multicolores كتضوي أي فضاء ببهجتها.",
+      "productImage": "img2.jpg",
+      "quantity": "10",
+      "prouctPrice": "270 DH"
+    },
+    {
+      "productID": "FL007",
+      "productTitle": "orchid",
+      "productDescription": "Orchidée violette فـ گصيص أنيق، كتعيش مدة طويلة وكتعطي لمسة راقية.",
+      "productImage":"img3.jpg",
+      "quantity": "4",
+      "prouctPrice": "350 DH"
+    },
+    {
+      "productID": "FL008",
+      "productTitle": "daisy",
+      "productDescription": "Arrangement de marguerites بيضين وصفرين كيضفو حيوية ولطف.",
+      "productImage": "img4.jpg",
+      "quantity": "12",
+      "prouctPrice": "190 DH"
+    }
+
+
 ]

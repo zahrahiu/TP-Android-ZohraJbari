@@ -20,18 +20,10 @@ import com.example.myapplication.data.Entities.Product
 
 @Composable
 fun DetailsScreen(product: Product) {
-    val imageRes = when (product.id) {
-        "1" -> R.drawable.sunflawer
-        "2" -> R.drawable.lily
-        "3" -> R.drawable.hibiscus
-        "4" -> R.drawable.tulip
-        "5" -> R.drawable.pansy
-        "6" -> R.drawable.lavender
-        else -> R.drawable.img1
-    }
+    val imageRes = getImageResource(product.image)
 
 
-    val backgroundColor = Color(0xFFFDF6F0) // نفس لون البطاقات
+    val backgroundColor = Color(0xFFFDF6F0)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -103,3 +95,4 @@ fun DetailsScreen(product: Product) {
         }
     }
 }
+

@@ -21,20 +21,13 @@ import com.example.myapplication.data.Entities.Product
 
 @Composable
 fun ProductItem(product: Product, onNavigateToDetails: () -> Unit) {
-    val imageRes = when (product.id) {
-        "1" -> R.drawable.sunflawer
-        "2" -> R.drawable.lily
-        "3" -> R.drawable.hibiscus
-        "4" -> R.drawable.tulip
-        "5" -> R.drawable.pansy
-        "6" -> R.drawable.lavender
-        else -> R.drawable.img1
-    }
+    val imageRes = getImageResource(product.image)
+
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f) // باش تكون مربعة تقريبا
+            .aspectRatio(1f)
             .clickable { onNavigateToDetails() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF6F0)),
@@ -66,3 +59,13 @@ fun ProductItem(product: Product, onNavigateToDetails: () -> Unit) {
         }
     }
 }
+fun getImageResource(productImage: String): Int {
+    return when (productImage) {
+        "hibiscus.jpg" -> R.drawable.hibiscus
+        "lavender.jpg" -> R.drawable.lavender
+        "lily.jpg" -> R.drawable.lily
+        "pansy.jpg" -> R.drawable.pansy
+        else -> R.drawable.img1
+    }
+}
+
