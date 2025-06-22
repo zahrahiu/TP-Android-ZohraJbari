@@ -1,285 +1,318 @@
 package com.example.emtyapp.ui.product.screens
 
+import com.google.accompanist.flowlayout.FlowRow
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.product.ProductIntent
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: ProductViewModel = viewModel(),
     onNavigateToDetails: (String) -> Unit
 ) {
-    // State from ViewModel
     val state by viewModel.state.collectAsState()
-
-    // Search state
     var searchQuery by remember { mutableStateOf("") }
-
-    // Filter states
-    var priceFilter by remember { mutableStateOf<Pair<Int, Int>?>(null) }
-    var availabilityFilter by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
 
-    // Load products on first launch
+    val types = listOf("ROSE", "TULIP", "LILY", "ORCHID", "HIBISCUS", "LAVENDER", "DAISY", "PANSY")
+    val colors = listOf("RED", "WHITE", "YELLOW", "PINK", "PURPLE", "MULTICOLOR")
+    val occasions = listOf("LOVE", "BIRTHDAY", "WEDDING", "ANNIVERSARY", "APOLOGY", "THANKS")
+
+    var tempSelectedType by remember { mutableStateOf<String?>(null) }
+    var tempSelectedOccasion by remember { mutableStateOf<String?>(null) }
+    var tempSelectedColors by remember { mutableStateOf(setOf<String>()) }
+    var tempPriceMin by remember { mutableStateOf("") }
+    var tempPriceMax by remember { mutableStateOf("") }
+
+    var appliedType by remember { mutableStateOf<String?>(null) }
+    var appliedOccasion by remember { mutableStateOf<String?>(null) }
+    var appliedColors by remember { mutableStateOf(setOf<String>()) }
+    var appliedPriceRange by remember { mutableStateOf(0f..400f) }
+
     LaunchedEffect(Unit) {
         viewModel.handleIntent(ProductIntent.LoadProducts)
     }
 
-    // Filter products based on search and filters
-    val filteredProducts = state.products.filter { product ->
-        // Search filter
-        val matchesSearch = product.name.contains(searchQuery, ignoreCase = true) ||
+    fun parsePriceRange(minStr: String, maxStr: String): ClosedFloatingPointRange<Float> {
+        val min = minStr.toFloatOrNull() ?: 0f
+        val max = maxStr.toFloatOrNull() ?: 400f
+        return if (min <= max) min..max else max..min
+    }
+
+    val filteredProducts = state.products?.filter { product ->
+        val matchesSearch = searchQuery.isBlank() ||
+                product.name.contains(searchQuery, ignoreCase = true) ||
                 product.description.contains(searchQuery, ignoreCase = true)
 
-        // Price filter
-        val matchesPrice = priceFilter?.let { (min, max) ->
-            val price = product.price.removeSuffix(" DH").toIntOrNull() ?: 0
-            price in min..max
-        } ?: true
+        val matchesType = appliedType == null || product.type.equals(appliedType, ignoreCase = true)
+        val matchesOccasion = appliedOccasion == null || product.occasions.any { it.equals(appliedOccasion, ignoreCase = true) }
+        val matchesColor = appliedColors.isEmpty() || product.colors.any { appliedColors.contains(it.uppercase()) }
 
-        // Availability filter
-        val matchesAvailability = if (availabilityFilter) {
-            product.quantity.toIntOrNull() ?: 0 > 0
-        } else true
+        val price = product.price.replace("DH", "", true)
+            .trim()
+            .replace(" ", "")
+            .replace(",", ".")
+            .toFloatOrNull() ?: 0f
 
-        matchesSearch && matchesPrice && matchesAvailability
-    }
+        val matchesPrice = price in appliedPriceRange
+
+        matchesSearch && matchesType && matchesOccasion && matchesColor && matchesPrice
+    } ?: emptyList()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "🌸 Flora Boutique",
-                        color = Color(0xFFDC4C3E),
-                        fontWeight = FontWeight.Black,
-                        fontSize = 26.sp
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFF8F0)
-                )
+                title = { Text("🌸 Flora Boutique", color = Color(0xFFDC4C3E), fontWeight = FontWeight.Black) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF8F0))
             )
         },
-        bottomBar = {
-            NavigationBar(containerColor = Color.White) {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = { Text("🏡", fontSize = 22.sp) },
-                    label = { Text("Accueil") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {},
-                    icon = { Text("❤️", fontSize = 22.sp) },
-                    label = { Text("Favoris") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {},
-                    icon = { Text("🛒", fontSize = 22.sp) },
-                    label = { Text("Panier") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {},
-                    icon = { Text("👩", fontSize = 22.sp) },
-                    label = { Text("Profil") }
-                )
-            }
-        },
-        containerColor = Color(0xFFFFFBF7),
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 20.dp)
+        containerColor = Color(0xFFFFFBF7)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Welcome section
-                Text(
-                    text = "Bienvenue, 🌷",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF5D4037)
-                )
-
-                Text(
-                    text = "Trouve ta fleur préférée !",
-                    fontSize = 16.sp,
-                    color = Color(0xFF8D6E63),
-                    modifier = Modifier.padding(bottom = 14.dp)
-                )
-
-                // Search bar
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("🔍 Rechercher une fleur...") },
+                    placeholder = { Text("🔍 Rechercher...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFDC4C3E),
-                        focusedBorderColor = Color(0xFFDC4C3E),
-                        cursorColor = Color(0xFFDC4C3E)
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
                     ),
-                    singleLine = true,
-                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true
+                )
+                FilterChip(
+                    selected = showFilters,
+                    onClick = { showFilters = !showFilters },
+                    label = { Text("Filtres") },
+                    leadingIcon = if (showFilters) {
+                        { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.rotate(180f)) }
+                    } else {
+                        { Icon(Icons.Default.ArrowDropDown, contentDescription = null) }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
+                        selectedLabelColor = Color(0xFFDC4C3E)
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AnimatedVisibility(
+                visible = showFilters,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                )
-
-                // Filters button
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Button(
-                        onClick = { showFilters = !showFilters },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFDC4C3E),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    var selectedFilterTab by remember { mutableStateOf<String?>(null) }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (showFilters) "Masquer filtres" else "Afficher filtres")
-                    }
-                }
-
-                // Filters section
-                if (showFilters) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.White, RoundedCornerShape(12.dp))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Filtrer par:",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        // Price filter
-                        Text("Prix:", fontWeight = FontWeight.Medium)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        ) {
-                            listOf(0 to 200, 201 to 300, 301 to 400).forEach { range ->
-                                FilterChip(
-                                    selected = priceFilter == range,
-                                    onClick = {
-                                        priceFilter = if (priceFilter == range) null else range
-                                    },
-                                    modifier = Modifier.padding(end = 8.dp),
-                                    label = { Text("${range.first}-${range.second} DH") }
-                                )
-                            }
-                        }
-
-                        // Availability filter
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        ) {
-                            Text("Disponibilité:", fontWeight = FontWeight.Medium)
-                            Spacer(modifier = Modifier.width(8.dp))
+                        listOf("Type", "Couleur", "Occasion").forEach { tab ->
                             FilterChip(
-                                selected = availabilityFilter,
-                                onClick = { availabilityFilter = !availabilityFilter },
-                                label = { Text("En stock seulement") }
-                            )
-                        }
-
-                        // Clear filters button
-                        if (priceFilter != null || availabilityFilter) {
-                            TextButton(
+                                selected = selectedFilterTab == tab,
                                 onClick = {
-                                    priceFilter = null
-                                    availabilityFilter = false
+                                    selectedFilterTab = if (selectedFilterTab == tab) null else tab
                                 },
-                                modifier = Modifier.align(Alignment.End)
-                            ) {
-                                Text("Réinitialiser les filtres", color = Color(0xFFDC4C3E))
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                // Products list or loading/error states
-                when {
-                    state.isLoading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = Color(0xFFDC4C3E))
-                        }
-                    }
-
-                    state.error != null -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Erreur : ${state.error}",
-                                color = Color.Red
+                                label = { Text(tab) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
+                                    selectedLabelColor = Color(0xFFDC4C3E)
+                                )
                             )
                         }
                     }
 
-                    else -> {
-                        ProductsList(
-                            products = filteredProducts,
-                            onNavigateToDetails = onNavigateToDetails
-                        )
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                        if (filteredProducts.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                    when (selectedFilterTab) {
+                        "Type" -> {
+                            FlowRow(
+                                mainAxisSpacing = 8.dp,
+                                crossAxisSpacing = 8.dp,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        "Aucun produit trouvé",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color(0xFF5D4037),
-                                        modifier = Modifier.padding(bottom = 8.dp)
-                                    )
-                                    Text(
-                                        "Essayez de modifier vos critères de recherche",
-                                        color = Color(0xFF8D6E63)
+                                types.forEach { type ->
+                                    FilterChip(
+                                        selected = tempSelectedType == type,
+                                        onClick = {
+                                            tempSelectedType = if (tempSelectedType == type) null else type
+                                        },
+                                        label = { Text(type) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFFDC4C3E)
+                                        )
                                     )
                                 }
                             }
                         }
+                        "Couleur" -> {
+                            FlowRow(
+                                mainAxisSpacing = 8.dp,
+                                crossAxisSpacing = 8.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                colors.forEach { color ->
+                                    FilterChip(
+                                        selected = tempSelectedColors.contains(color),
+                                        onClick = {
+                                            tempSelectedColors = if (tempSelectedColors.contains(color)) {
+                                                tempSelectedColors - color
+                                            } else {
+                                                tempSelectedColors + color
+                                            }
+                                        },
+                                        label = { Text(color) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFFDC4C3E)
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        "Occasion" -> {
+                            FlowRow(
+                                mainAxisSpacing = 8.dp,
+                                crossAxisSpacing = 8.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                occasions.forEach { occasion ->
+                                    FilterChip(
+                                        selected = tempSelectedOccasion == occasion,
+                                        onClick = {
+                                            tempSelectedOccasion = if (tempSelectedOccasion == occasion) null else occasion
+                                        },
+                                        label = { Text(occasion) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFFDC4C3E)
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        null -> {
+                            Text(
+                                "Sélectionnez un filtre pour afficher les options",
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 12.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = tempPriceMin,
+                            onValueChange = { newValue -> tempPriceMin = newValue.filter { it.isDigit() || it == '.' } },
+                            label = { Text("Prix Min") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = tempPriceMax,
+                            onValueChange = { newValue -> tempPriceMax = newValue.filter { it.isDigit() || it == '.' } },
+                            label = { Text("Prix Max") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextButton(onClick = {
+                            tempSelectedType = null
+                            tempSelectedOccasion = null
+                            tempSelectedColors = emptySet()
+                            tempPriceMin = ""
+                            tempPriceMax = ""
+                        }) {
+                            Text("Réinitialiser", color = Color(0xFFDC4C3E))
+                        }
+                        Button(onClick = {
+                            appliedType = tempSelectedType
+                            appliedOccasion = tempSelectedOccasion
+                            appliedColors = tempSelectedColors
+                            appliedPriceRange = parsePriceRange(tempPriceMin, tempPriceMax)
+                            showFilters = false
+                        }) {
+                            Text("Appliquer")
+                        }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    state.isLoading -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
+                    state.error != null -> Center { Text("Erreur: ${state.error}", color = Color.Red) }
+                    filteredProducts.isEmpty() -> Center { Text("Aucun produit trouvé") }
+                    else -> ProductsList(
+                        products = filteredProducts,
+                        onNavigateToDetails = onNavigateToDetails
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+fun Center(content: @Composable BoxScope.() -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+        content = content
     )
 }

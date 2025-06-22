@@ -20,18 +20,21 @@ import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Product
 
 @Composable
-fun ProductItem(product: Product, onNavigateToDetails: () -> Unit) {
+fun ProductItem(
+    product: Product,
+    modifier: Modifier = Modifier,
+    onItemClick: () -> Unit
+) {
     val imageRes = getImageResource(product.image)
 
-
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .clickable { onNavigateToDetails() },
-        shape = RoundedCornerShape(20.dp),
+            .aspectRatio(0.8f) // Ratio adapté pour la grille
+            .clickable(onClick = onItemClick),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF6F0)),
-        elevation = CardDefaults.cardElevation(8.dp)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -45,21 +48,30 @@ fun ProductItem(product: Product, onNavigateToDetails: () -> Unit) {
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(90.dp)
+                    .size(100.dp)
                     .clip(CircleShape)
             )
 
-            Text(
-                text = product.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF5D4037),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = product.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF5D4037),
+                    maxLines = 1
+                )
+                Text(
+                    text = product.price,
+                    fontSize = 14.sp,
+                    color = Color(0xFF8D6E63),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
-fun getImageResource(productImage: String): Int {
+
+private fun getImageResource(productImage: String): Int {
     return when (productImage) {
         "hibiscus.jpg" -> R.drawable.hibiscus
         "lavender.jpg" -> R.drawable.lavender
@@ -68,4 +80,3 @@ fun getImageResource(productImage: String): Int {
         else -> R.drawable.img1
     }
 }
-
