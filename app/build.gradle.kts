@@ -63,7 +63,7 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.1.0")
     implementation ("com.google.accompanist:accompanist-flowlayout:0.31.5-beta")
 
-
+    implementation ("androidx.compose.material:material-icons-extended:1.6.1")
 
 
     testImplementation(libs.junit)

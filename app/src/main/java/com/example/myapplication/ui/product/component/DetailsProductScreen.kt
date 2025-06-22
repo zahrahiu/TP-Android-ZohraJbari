@@ -10,7 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,83 +23,70 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
+import com.example.myapplication.data.Entities.Addon
 import com.example.myapplication.data.Entities.Product
+import kotlinx.coroutines.launch
 
-// Palette sophistiquée
-val JauneDeNaples = Color(0xFFFADA5E)  // Jaune doux et chaleureux
-val GrisPetitGris = Color(0xFF8E8E93)   // Gris subtil et élégant
-val GrisClair = Color(0xFFF5F5F5)       // Fond léger
-val GrisFonce = Color(0xFF3A3A3A)       // Pour textes
+/* الألوان */
+val JauneDeNaples = Color(0xFFFADA5E)
+val GrisPetitGris = Color(0xFF8E8E93)
+val GrisClair     = Color(0xFFF5F5F5)
+val GrisFonce     = Color(0xFF3A3A3A)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
     product: Product,
     navController: NavController? = null,
-    onAddToCart: () -> Unit = {}
+    onAddToCart: (List<Pair<Addon, Int>>) -> Boolean = { true }
 ) {
     val imageRes = when (product.image) {
         "hibiscus.jpg" -> R.drawable.hibiscus
         "lavender.jpg" -> R.drawable.lavender
-        "lily.jpg" -> R.drawable.lily
-        "pansy.jpg" -> R.drawable.pansy
-        else -> R.drawable.img1
+        "lily.jpg"     -> R.drawable.lily
+        "pansy.jpg"    -> R.drawable.pansy
+        else           -> R.drawable.img1
     }
+
+    var showSheet by remember { mutableStateOf(false) }
+    val snackState = remember { SnackbarHostState() }
+    val scope      = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Détails Produit",
-                        color = GrisFonce,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
+                title = { Text("Détails Produit", color = GrisFonce, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController?.popBackStack() },
                         modifier = Modifier
-                            .background(JauneDeNaples.copy(alpha = 0.2f), CircleShape)
+                            .background(JauneDeNaples.copy(.2f), CircleShape)
                             .padding(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Retour",
-                            tint = GrisFonce
-                        )
-                    }
+                    ) { Icon(Icons.Default.ArrowBack, null, tint = GrisFonce) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = GrisFonce,
-                    navigationIconContentColor = GrisFonce
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
+        snackbarHost = { SnackbarHost(snackState) },
         containerColor = GrisClair
-    ) { paddingValues ->
+    ) { pad ->
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(pad)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Carte image avec bordure jaune subtile
             Card(
-                modifier = Modifier
+                Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .height(300.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = JauneDeNaples.copy(alpha = 0.1f)
-                ),
-                elevation = CardDefaults.cardElevation(2.dp)
+                shape  = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(JauneDeNaples.copy(.1f))
             ) {
                 Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = "Image de ${product.name}",
+                    painter = painterResource(imageRes),
+                    contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
@@ -108,138 +95,97 @@ fun DetailsScreen(
                 )
             }
 
-            // Carte de détails
             Card(
-                modifier = Modifier
+                Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                ),
-                elevation = CardDefaults.cardElevation(4.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                ) {
-                    // Titre et prix
+                Column(Modifier.padding(24.dp)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = product.name,
+                            product.name,
                             style = MaterialTheme.typography.headlineMedium,
                             color = GrisFonce,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f)
+                            fontWeight = FontWeight.Bold
                         )
-
-                        // Badge prix
                         Box(
-                            modifier = Modifier
+                            Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(JauneDeNaples.copy(alpha = 0.3f))
+                                .background(JauneDeNaples.copy(.3f))
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text(
-                                text = product.price,
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = GrisFonce,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text(product.price, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(Modifier.height(24.dp))
 
-                    // Section Description
+                    Text("Description", style = MaterialTheme.typography.titleLarge, color = GrisPetitGris)
                     Text(
-                        text = "Description",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = GrisPetitGris,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    Text(
-                        text = product.description,
+                        product.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = GrisPetitGris.copy(alpha = 0.8f),
-                        lineHeight = 24.sp,
-                        textAlign = TextAlign.Justify
+                        color = GrisPetitGris.copy(.8f),
+                        textAlign = TextAlign.Justify,
+                        lineHeight = 24.sp
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(Modifier.height(24.dp))
 
-                    // Caractéristiques
-                    product.type?.let {
-                        DetailRow("Type", it, GrisPetitGris, JauneDeNaples)
-                    }
-                    product.colors?.joinToString(", ")?.let {
-                        DetailRow("Couleurs", it, GrisPetitGris, JauneDeNaples)
-                    }
+                    DetailRow("Type",     product.type,                 GrisPetitGris, JauneDeNaples)
+                    DetailRow("Couleurs", product.colors.joinToString(),GrisPetitGris, JauneDeNaples)
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
 
-            // Bouton d'action élégant
             Button(
-                onClick = onAddToCart,
-                modifier = Modifier
+                onClick = { showSheet = true },
+                Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = JauneDeNaples,
-                    contentColor = GrisFonce
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 2.dp,
-                    pressedElevation = 4.dp
-                )
-            ) {
-                Text(
-                    text = "Ajouter au panier • ${product.price}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.5.sp
-                )
-            }
+                shape  = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(JauneDeNaples, GrisFonce)
+            ) { Text("Ajouter au panier • ${product.price}") }
         }
     }
+
+    AddOnsBottomSheet(
+        open = showSheet,
+        onDismiss = { showSheet = false },
+        onValidate = { selected ->
+            val ok = onAddToCart(selected)
+            if (!ok) {
+                scope.launch { snackState.showSnackbar("Stock insuffisant pour ${product.name}") }
+            } else {
+                showSheet = false
+            }
+        }
+    )
 }
 
 @Composable
 private fun DetailRow(label: String, value: String, textColor: Color, accentColor: Color) {
     Row(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp),
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Text(label, color = textColor)
         Text(
-            text = label,
-            color = textColor,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = value,
+            value,
             color = GrisFonce,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .background(accentColor.copy(alpha = 0.2f))
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .background(accentColor.copy(.2f))
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }
 }
