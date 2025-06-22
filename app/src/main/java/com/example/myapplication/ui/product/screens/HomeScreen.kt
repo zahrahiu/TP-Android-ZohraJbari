@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.product.ProductIntent
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
+import com.example.myapplication.data.Entities.Product
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -47,6 +48,18 @@ fun HomeScreen(
     var appliedOccasion by remember { mutableStateOf<String?>(null) }
     var appliedColors by remember { mutableStateOf(setOf<String>()) }
     var appliedPriceRange by remember { mutableStateOf(0f..400f) }
+
+    // *État favoris — IDs des produits favoris*
+    var favoriteProductIds by remember { mutableStateOf(setOf<String>()) }
+
+    // Fonction pour ajouter/retirer un produit des favoris
+    val toggleFavorite: (Product) -> Unit = { product ->
+        favoriteProductIds = if (favoriteProductIds.contains(product.id)) {
+            favoriteProductIds - product.id
+        } else {
+            favoriteProductIds + product.id
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.handleIntent(ProductIntent.LoadProducts)
@@ -300,7 +313,9 @@ fun HomeScreen(
                     filteredProducts.isEmpty() -> Center { Text("Aucun produit trouvé") }
                     else -> ProductsList(
                         products = filteredProducts,
-                        onNavigateToDetails = onNavigateToDetails
+                        onNavigateToDetails = onNavigateToDetails,
+                        favoriteProductIds = favoriteProductIds,
+                        onToggleFavorite = toggleFavorite
                     )
                 }
             }

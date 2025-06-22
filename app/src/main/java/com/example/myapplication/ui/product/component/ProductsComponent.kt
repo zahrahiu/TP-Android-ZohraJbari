@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.product.component
 
+import ProductItem
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -15,7 +16,9 @@ import com.example.myapplication.data.Entities.Product
 fun ProductsList(
     products: List<Product>,
     onNavigateToDetails: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    favoriteProductIds: Set<String>,               // IDs des produits favoris
+    onToggleFavorite: (Product) -> Unit             // Callback pour toggle favoris
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -30,7 +33,9 @@ fun ProductsList(
             ProductItem(
                 product = product,
                 modifier = Modifier.padding(4.dp),
-                onItemClick = { onNavigateToDetails(product.id) }
+                onItemClick = { onNavigateToDetails(product.id) },
+                isFavorite = favoriteProductIds.contains(product.id),
+                onFavoriteClick = onToggleFavorite
             )
         }
     }

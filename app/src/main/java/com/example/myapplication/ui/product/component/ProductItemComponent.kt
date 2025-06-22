@@ -1,12 +1,10 @@
-package com.example.myapplication.ui.product.component
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,49 +21,72 @@ import com.example.myapplication.data.Entities.Product
 fun ProductItem(
     product: Product,
     modifier: Modifier = Modifier,
-    onItemClick: () -> Unit
+    onItemClick: () -> Unit,
+    onFavoriteClick: (Product) -> Unit, // Callback quand on clique sur cœur
+    isFavorite: Boolean // État favoris passé en paramètre
 ) {
     val imageRes = getImageResource(product.image)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.8f) // Ratio adapté pour la grille
+            .aspectRatio(0.8f)
             .clickable(onClick = onItemClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF6F0)),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = product.name,
-                contentScale = ContentScale.Crop,
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-            )
+                    .padding(12.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = product.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                )
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = product.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF5D4037),
-                    maxLines = 1
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = product.name,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5D4037),
+                        maxLines = 1
+                    )
+                    Text(
+                        text = product.price,
+                        fontSize = 14.sp,
+                        color = Color(0xFF8D6E63),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
+            // Bouton favoris en haut à droite
+            IconButton(
+                onClick = { onFavoriteClick(product) },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline
+                    ),
+                    contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                    tint = Color.Unspecified  // hna bghina l'image tban b les couleurs dyalha asliya
                 )
-                Text(
-                    text = product.price,
-                    fontSize = 14.sp,
-                    color = Color(0xFF8D6E63),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+
+
             }
         }
     }
