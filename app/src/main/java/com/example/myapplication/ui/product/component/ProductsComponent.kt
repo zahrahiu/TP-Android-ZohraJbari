@@ -30,13 +30,14 @@ fun ProductsList(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(products) { product ->
+
             ProductItem(
                 product = product,
-                modifier = Modifier.padding(4.dp),
-                onItemClick = { onNavigateToDetails(product.id) },
-                isFavorite = favoriteProductIds.contains(product.id),
-                onFavoriteClick = onToggleFavorite
+                isFavorite     = favoriteProductIds.contains(product.id),
+                onItemClick    = { onNavigateToDetails(product.id) },
+                onFavoriteClick= { onToggleFavorite(product) }           // ⇐
             )
+
         }
     }
 }

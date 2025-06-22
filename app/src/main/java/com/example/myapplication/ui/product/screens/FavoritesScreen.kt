@@ -1,6 +1,5 @@
-package com.example.emtyapp.ui.product.screens
+package com.example.myapplication.ui.product.screens
 
-import com.google.accompanist.flowlayout.FlowRow
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,17 +19,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.ui.product.ProductIntent
+import com.google.accompanist.flowlayout.FlowRow
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
-import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.ProductIntent
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun HomeScreen(
+fun FavoritesScreen(
     viewModel: ProductViewModel = viewModel(),
     onNavigateToDetails: (String) -> Unit,
-    onNavigateToFavorites: () -> Unit
+    onNavigateToHome: () -> Unit,
+    onNavigateToFavorites: () -> Unit,
+
 ) {
     val state       by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
@@ -61,27 +62,31 @@ fun HomeScreen(
         return if (mn <= mx) mn..mx else mx..mn
     }
 
-    val filtered = state.products.filter { p ->
-        val matchesSearch   = searchQuery.isBlank() ||
+    val favProducts = state.products.filter { favoriteIds.contains(it.id) }
+
+    val filtered = favProducts.filter { p ->
+        val matchSearch = searchQuery.isBlank() ||
                 p.name.contains(searchQuery, true) ||
                 p.description.contains(searchQuery, true)
-        val matchesType     = aType == null || p.type.equals(aType, true)
-        val matchesOccasion = aOccasion == null || p.occasions.any { it.equals(aOccasion, true) }
-        val matchesColor    = aColors.isEmpty() || p.colors.any { aColors.contains(it.uppercase()) }
-        val priceValue      = p.price.replace("DH","",true).replace(" ","").replace(",",".")
-            .toFloatOrNull() ?: 0f
-        val matchesPrice    = priceValue in aPriceRange
-        matchesSearch && matchesType && matchesOccasion && matchesColor && matchesPrice
+
+        val matchType  = aType == null || p.type.equals(aType, true)
+        val matchOcc   = aOccasion == null || p.occasions.any { it.equals(aOccasion, true) }
+        val matchColor = aColors.isEmpty() || p.colors.any { aColors.contains(it.uppercase()) }
+
+        val priceValue = p.price.replace("DH","",true)
+            .replace(" ","").replace(",",".").toFloatOrNull() ?: 0f
+        val matchPrice = priceValue in aPriceRange
+
+        matchSearch && matchType && matchOcc && matchColor && matchPrice
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🌸 Flora Boutique", color = Color(0xFFDC4C3E), fontWeight = FontWeight.Black) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF8F0))
+                title = { Text("❤️ Mes Favoris", color = Color(0xFFDC4C3E), fontWeight = FontWeight.Black) },
+                colors = TopAppBarDefaults.topAppBarColors(Color(0xFFFFF8F0))
             )
         },
-        containerColor = Color(0xFFFFFBF7),
         bottomBar = {
             NavigationBar(containerColor = Color(0xFFFFF8F0)) {
                 NavigationBarItem(
@@ -94,11 +99,13 @@ fun HomeScreen(
                     selected = false, onClick = onNavigateToFavorites,
                     icon = { Text("❤", fontSize = 20.sp) }, label = { Text("Favoris") }
                 )
-            }}
-    ){ padding ->
+            }},
+        containerColor = Color(0xFFFFFBF7)
+    ) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
         ) {
+            /* شريط البحث + زر الفيلتر */
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -117,12 +124,11 @@ fun HomeScreen(
                     singleLine  = true
                 )
                 FilterChip(
-                    selected   = showFilters,
-                    onClick    = { showFilters = !showFilters },
-                    label      = { Text("Filtres") },
-                    leadingIcon= {
+                    selected = showFilters, onClick = { showFilters = !showFilters },
+                    label = { Text("Filtres") },
+                    leadingIcon = {
                         Icon(Icons.Default.ArrowDropDown,null,
-                            Modifier.rotate(if(showFilters)180f else 0f))
+                            Modifier.rotate(if(showFilters) 180f else 0f))
                     },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
@@ -135,8 +141,8 @@ fun HomeScreen(
 
             AnimatedVisibility(
                 visible = showFilters,
-                enter   = fadeIn() + expandVertically(),
-                exit    = fadeOut() + shrinkVertically()
+                enter = fadeIn()+expandVertically(),
+                exit  = fadeOut()+shrinkVertically()
             ) {
                 Column(
                     Modifier.fillMaxWidth()
@@ -149,8 +155,8 @@ fun HomeScreen(
                     Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp)) {
                         listOf("Type","Couleur","Occasion").forEach { t ->
                             FilterChip(
-                                selected = tab == t,
-                                onClick  = { tab = if (tab == t) null else t },
+                                selected = tab==t,
+                                onClick  = { tab = if(tab==t) null else t },
                                 label    = { Text(t) },
                                 colors   = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
@@ -162,12 +168,12 @@ fun HomeScreen(
 
                     Spacer(Modifier.height(12.dp))
 
-                    when (tab) {
-                        "Type" -> FlowRow(mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
+                    when(tab) {
+                        "Type" -> FlowRow(mainAxisSpacing=8.dp,crossAxisSpacing=8.dp) {
                             types.forEach { t ->
                                 FilterChip(
-                                    selected = tType == t,
-                                    onClick  = { tType = if (tType == t) null else t },
+                                    selected = tType==t,
+                                    onClick  = { tType = if(tType==t) null else t },
                                     label    = { Text(t) },
                                     colors   = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
@@ -176,26 +182,26 @@ fun HomeScreen(
                                 )
                             }
                         }
-                        "Couleur" -> FlowRow(mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
+                        "Couleur" -> FlowRow(mainAxisSpacing=8.dp,crossAxisSpacing=8.dp) {
                             colors.forEach { c ->
                                 FilterChip(
                                     selected = tColors.contains(c),
                                     onClick  = {
-                                        tColors = if (tColors.contains(c)) tColors - c else tColors + c
+                                        tColors = if(tColors.contains(c)) tColors-c else tColors+c
                                     },
-                                    label    = { Text(c) },
-                                    colors   = FilterChipDefaults.filterChipColors(
+                                    label = { Text(c) },
+                                    colors= FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
                                         selectedLabelColor     = Color(0xFFDC4C3E)
                                     )
                                 )
                             }
                         }
-                        "Occasion" -> FlowRow(mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
+                        "Occasion" -> FlowRow(mainAxisSpacing=8.dp,crossAxisSpacing=8.dp) {
                             occasions.forEach { o ->
                                 FilterChip(
-                                    selected = tOccasion == o,
-                                    onClick  = { tOccasion = if (tOccasion == o) null else o },
+                                    selected = tOccasion==o,
+                                    onClick  = { tOccasion = if(tOccasion==o) null else o },
                                     label    = { Text(o) },
                                     colors   = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
@@ -204,10 +210,8 @@ fun HomeScreen(
                                 )
                             }
                         }
-                        null -> Text(
-                            "Sélectionnez un filtre pour afficher les options",
-                            color = Color.Gray, modifier = Modifier.padding(vertical = 12.dp)
-                        )
+                        null -> Text("Sélectionnez un filtre pour afficher les options",
+                            color = Color.Gray, modifier = Modifier.padding(vertical = 12.dp))
                     }
 
                     Spacer(Modifier.height(16.dp))
@@ -215,12 +219,12 @@ fun HomeScreen(
                     Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = pMin, singleLine = true,
-                            onValueChange = { pMin = it.filter { ch -> ch.isDigit() || ch == '.' } },
+                            onValueChange = { pMin = it.filter { ch -> ch.isDigit() || ch=='.' } },
                             label = { Text("Prix Min") }, modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = pMax, singleLine = true,
-                            onValueChange = { pMax = it.filter { ch -> ch.isDigit() || ch == '.' } },
+                            onValueChange = { pMax = it.filter { ch -> ch.isDigit() || ch=='.' } },
                             label = { Text("Prix Max") }, modifier = Modifier.weight(1f)
                         )
                     }
@@ -229,13 +233,12 @@ fun HomeScreen(
 
                     Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(16.dp)) {
                         TextButton(onClick = {
-                            tType=null; tOccasion=null; tColors= emptySet()
-                            pMin=""; pMax=""
+                            tType=null; tOccasion=null; tColors= emptySet(); pMin=""; pMax=""
                         }) { Text("Réinitialiser", color = Color(0xFFDC4C3E)) }
 
                         Button(onClick = {
-                            aType = tType; aOccasion = tOccasion; aColors = tColors
-                            aPriceRange = parsePrice(pMin, pMax); showFilters = false
+                            aType=tType; aOccasion=tOccasion; aColors=tColors
+                            aPriceRange = parsePrice(pMin,pMax); showFilters=false
                         }) { Text("Appliquer") }
                     }
                 }
@@ -245,21 +248,20 @@ fun HomeScreen(
 
             Box(Modifier.weight(1f)) {
                 when {
-                    state.isLoading       -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
-                    state.error != null   -> Center { Text("Erreur: ${state.error}", color = Color.Red) }
-                    filtered.isEmpty()    -> Center { Text("Aucun produit trouvé") }
+                    state.isLoading        -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
+                    favProducts.isEmpty()  -> Center { Text("Aucun produit favori pour le moment.") }
+                    filtered.isEmpty()     -> Center { Text("Filtre vide") }
                     else -> ProductsList(
                         products            = filtered,
-                        favoriteProductIds  = favoriteIds,            // ✅
+                        favoriteProductIds  = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite    = viewModel::toggleFavorite  // ✅
+                        onToggleFavorite    = viewModel::toggleFavorite
                     )
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun Center(content: @Composable BoxScope.() -> Unit) {

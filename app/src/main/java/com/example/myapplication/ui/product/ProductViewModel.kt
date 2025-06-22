@@ -17,6 +17,16 @@ class ProductViewModel @Inject constructor(
     private val _state = MutableStateFlow(ProductViewState())
     val state: StateFlow<ProductViewState> = _state
 
+    private val _favoriteIds = MutableStateFlow<Set<String>>(emptySet())
+    val favoriteIds: StateFlow<Set<String>> = _favoriteIds
+
+    fun toggleFavorite(product: Product) {
+        _favoriteIds.value =
+            if (_favoriteIds.value.contains(product.id))
+                _favoriteIds.value - product.id
+            else
+                _favoriteIds.value + product.id
+    }
 
     fun getProductById(id: String): Product? {
         return _state.value.products.find { it.id == id }

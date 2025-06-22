@@ -20,11 +20,11 @@ import com.example.myapplication.data.Entities.Product
 @Composable
 fun ProductItem(
     product: Product,
-    modifier: Modifier = Modifier,
+    isFavorite: Boolean,
     onItemClick: () -> Unit,
-    onFavoriteClick: (Product) -> Unit, // Callback quand on clique sur cœur
-    isFavorite: Boolean // État favoris passé en paramètre
-) {
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+)  {
     val imageRes = getImageResource(product.image)
 
     Card(
@@ -72,18 +72,16 @@ fun ProductItem(
 
             // Bouton favoris en haut à droite
             IconButton(
-                onClick = { onFavoriteClick(product) },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(24.dp)
-            ) {
+                onClick = onFavoriteClick,                       // ⇐
+                modifier = Modifier.align(Alignment.TopEnd)
+                    .padding(8.dp).size(24.dp)
+            )  {
                 Icon(
                     painter = painterResource(
                         if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline
                     ),
                     contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
-                    tint = Color.Unspecified  // hna bghina l'image tban b les couleurs dyalha asliya
+                    tint = Color.Unspecified
                 )
 
 
