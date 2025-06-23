@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private  val repository: ProductRepository
+    private val repository: ProductRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductViewState())
@@ -28,6 +29,8 @@ class ProductViewModel @Inject constructor(
             else
                 _favoriteIds.value + product.id
     }
+
+
 
 
 

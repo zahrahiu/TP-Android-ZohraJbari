@@ -114,7 +114,6 @@ fun FavoritesScreen(
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
         ) {
-            /* شريط البحث + زر الفيلتر */
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

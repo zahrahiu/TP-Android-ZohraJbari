@@ -1,7 +1,9 @@
 package com.example.myapplication.ui.product.component
 
+import ProductItem
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +28,7 @@ import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Addon
 import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.ProductViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -41,6 +44,7 @@ val RedPromo = Color(0xFFE53935)
 @Composable
 fun DetailsScreen(
     product: Product,
+    viewModel: ProductViewModel,
     navController: NavController? = null,
     onAddToCart: (List<Pair<Addon, Int>>) -> Boolean = { true }
 ) {
@@ -57,7 +61,7 @@ fun DetailsScreen(
     val snackHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Calcul du prix avec promotion
+    // Parse price string to float
     fun parsePrice(priceStr: String): Float {
         return priceStr.replace(Regex("[^0-9.]"), "").toFloatOrNull() ?: 0f
     }
@@ -67,14 +71,26 @@ fun DetailsScreen(
         oldPrice * (100 - discount) / 100
     }
 
-    // Compte à rebours
-    val remainingTime by produceState(initialValue = calculateRemainingTime(product.offerEndEpochMillis),
-        product.offerEndEpochMillis) {
+    // Remaining time for offer
+    val remainingTime by produceState(
+        initialValue = calculateRemainingTime(product.offerEndEpochMillis),
+        product.offerEndEpochMillis
+    ) {
         while (product.offerEndEpochMillis != null) {
             value = calculateRemainingTime(product.offerEndEpochMillis)
-            delay(60_000) // Mise à jour chaque minute
+            delay(60_000)
         }
     }
+
+    val productsState by viewModel.state.collectAsState()
+
+    // Filter similar products by type or shared colors (excluding current product)
+    val similarProducts = productsState.products.filter {
+        it.id != product.id && (
+                it.type == product.type ||
+                        it.colors.any { c -> product.colors.contains(c) }
+                )
+    }.take(5) // max 5 produits similaires
 
     Scaffold(
         topBar = {
@@ -84,20 +100,20 @@ fun DetailsScreen(
                     IconButton(
                         onClick = { navController?.popBackStack() },
                         modifier = Modifier
-                            .background(JauneDeNaples.copy(.2f), CircleShape)
+                            .background(JauneDeNaples.copy(alpha = 0.2f), CircleShape)
                             .padding(6.dp)
-                    ) { Icon(Icons.Default.ArrowBack, null, tint = GrisFonce) }
+                    ) { Icon(Icons.Default.ArrowBack, contentDescription = null, tint = GrisFonce) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
         snackbarHost = { SnackbarHost(snackHost) },
         containerColor = GrisClair
-    ) { pad ->
+    ) { paddingValues ->
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(pad)
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
             /* -------- Image card -------- */
@@ -111,7 +127,7 @@ fun DetailsScreen(
                         .fillMaxWidth()
                         .height(300.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(JauneDeNaples.copy(.1f))
+                    colors = CardDefaults.cardColors(JauneDeNaples.copy(alpha = 0.1f))
                 ) {
                     Image(
                         painter = painterResource(imageRes),
@@ -124,7 +140,7 @@ fun DetailsScreen(
                     )
                 }
 
-                // Badge de promotion
+                // Promotion badge
                 if (product.discountPercent != null && remainingTime != null) {
                     Box(
                         modifier = Modifier
@@ -143,6 +159,9 @@ fun DetailsScreen(
                 }
             }
 
+            Spacer(Modifier.height(12.dp))
+
+
             /* -------- Detail card -------- */
             Card(
                 Modifier
@@ -151,7 +170,7 @@ fun DetailsScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(Modifier.padding(24.dp)) {
-                    /* Titre + Prix */
+                    /* Title + Price */
                     Column(Modifier.fillMaxWidth()) {
                         Text(
                             product.name,
@@ -198,7 +217,7 @@ fun DetailsScreen(
                         }
                     }
 
-                    /* ----------- Quantité disponible ----------- */
+                    /* Quantity */
                     Spacer(Modifier.height(12.dp))
                     DetailRow(
                         label = "Quantité",
@@ -214,7 +233,7 @@ fun DetailsScreen(
                     Text(
                         product.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = GrisPetitGris.copy(.8f),
+                        color = GrisPetitGris.copy(alpha = 0.8f),
                         textAlign = TextAlign.Justify,
                         lineHeight = 24.sp
                     )
@@ -225,9 +244,7 @@ fun DetailsScreen(
                 }
             }
 
-            Spacer(Modifier.weight(1f))
-
-            /* -------- Bouton Ajouter -------- */
+            Spacer(Modifier.height(24.dp))
             Button(
                 onClick = { showSheet = true },
                 Modifier
@@ -246,6 +263,44 @@ fun DetailsScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+            /* -------- Produits similaires -------- */
+            if (similarProducts.isNotEmpty()) {
+                Text(
+                    "Produits similaires",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+                    color = GrisFonce,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(start = 16.dp)
+                ) {
+                    similarProducts.forEach { simProd ->
+                        ProductItem(
+                            product = simProd,
+                            isFavorite = viewModel.favoriteIds.collectAsState().value.contains(simProd.id),
+                            onItemClick = {
+                                navController?.navigate("details/${simProd.id}")
+                            },
+                            onFavoriteClick = {
+                                viewModel.toggleFavorite(simProd)
+                            },
+                            modifier = Modifier
+                                .width(180.dp)
+                                .padding(end = 12.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            /* -------- Add to cart button -------- */
+
         }
     }
 
@@ -304,7 +359,7 @@ private fun DetailRow(
             color = GrisFonce,
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .background(accentColor.copy(.2f))
+                .background(accentColor.copy(alpha = 0.2f))
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }

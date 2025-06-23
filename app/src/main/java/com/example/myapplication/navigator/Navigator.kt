@@ -55,6 +55,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 DetailsScreen(
                     product = prod,
                     navController = nav,
+                    viewModel     = viewModel,
                     onAddToCart = { selected ->
                         val ok = cartVM.addToCart(prod, selected)
                         if (ok) nav.navigate(Routes.Cart)
