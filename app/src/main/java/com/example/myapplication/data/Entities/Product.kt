@@ -23,8 +23,12 @@ data class Product(
     val occasions: List<String>,
     @SerializedName("discountPercent")
     val discountPercent: Int?  ,
+
     @SerializedName("offerEnd")
     val offerEndEpochMillis: Long?,
-    val rating: Int = 0
+    val rating: Int = 0,
+    @SerializedName("category")
+val category: String
+
 
 )

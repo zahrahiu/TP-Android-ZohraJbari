@@ -10,7 +10,8 @@
     "colors": ["RED", "PINK"],
     "occasions": ["LOVE", "ANNIVERSARY"],
     "discountPercent": 30,
-    "offerEnd": 1753144799000
+    "offerEnd": 1753144799000,
+    "category": "FLEURS"
   },
   {
     "productID": "FL002",
@@ -23,7 +24,8 @@
     "colors": ["PURPLE"],
     "occasions": ["THANKS", "BIRTHDAY"],
     "discountPercent": 50,
-    "offerEnd": 1053200799012
+    "offerEnd": 1053200799012,
+    "category": "FLEURS"
   },
   {
     "productID": "FL003",
@@ -34,8 +36,8 @@
     "productPrice": "300 DH",
     "type": "LILY",
     "colors": ["WHITE"],
-    "occasions": ["WEDDING", "ANNIVERSARY"]
-
+    "occasions": ["WEDDING", "ANNIVERSARY"],
+    "category": "EN_POT"
   },
   {
     "productID": "FL004",
@@ -46,7 +48,8 @@
     "productPrice": "180 DH",
     "type": "PANSY",
     "colors": ["MULTICOLOR"],
-    "occasions": ["BIRTHDAY", "THANKS"]
+    "occasions": ["BIRTHDAY", "THANKS"],
+    "category": "FLEURS"
   },
   {
     "productID": "FL005",
@@ -57,7 +60,8 @@
     "productPrice": "320 DH",
     "type": "ROSE",
     "colors": ["RED"],
-    "occasions": ["LOVE", "WEDDING"]
+    "occasions": ["LOVE", "WEDDING"],
+    "category": "ROSES"
   },
   {
     "productID": "FL006",
@@ -70,7 +74,8 @@
     "colors": ["MULTICOLOR"],
     "occasions": ["BIRTHDAY", "THANKS"],
     "discountPercent": 20,
-    "offerEnd": 1151244709000
+    "offerEnd": 1151244709000,
+    "category": "FLEURS"
   },
   {
     "productID": "FL007",
@@ -81,7 +86,8 @@
     "productPrice": "350 DH",
     "type": "ORCHID",
     "colors": ["PURPLE"],
-    "occasions": ["WEDDING", "ANNIVERSARY"]
+    "occasions": ["WEDDING", "ANNIVERSARY"],
+    "category": "EN_POT"
   },
   {
     "productID": "FL008",
@@ -92,6 +98,7 @@
     "productPrice": "190 DH",
     "type": "DAISY",
     "colors": ["WHITE", "YELLOW"],
-    "occasions": ["APOLOGY", "THANKS"]
+    "occasions": ["APOLOGY", "THANKS"],
+    "category": "ARRANGEMENT"
   }
 ]

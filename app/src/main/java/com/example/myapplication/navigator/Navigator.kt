@@ -13,13 +13,17 @@ import com.example.myapplication.ui.cart.CartScreen
 import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.DetailsScreen
+import com.example.myapplication.ui.product.screens.CategoryProductsScreen
+import com.example.myapplication.ui.product.screens.CategorySelectionScreen
 import com.example.myapplication.ui.product.screens.FavoritesScreen
 
 object Routes {
-    const val Home          = "home"
-    const val Favorites     = "favorites"
+    const val Home = "home"
+    const val Favorites = "favorites"
     const val ProductDetail = "details"
-    const val Cart          = "cart"
+    const val Cart = "cart"
+    const val CategorySelection = "category_selection"
+    const val CategoryProducts = "category_products"
 }
 
 @Composable
@@ -34,6 +38,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateToCart = { nav.navigate(Routes.Cart) },
+                onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
                 currentRoute = Routes.Home
             )
         }
@@ -46,16 +51,15 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateToCart = { nav.navigate(Routes.Cart) }
             )
         }
-
         composable("${Routes.ProductDetail}/{id}",
-            arguments = listOf(navArgument("id"){ type = NavType.StringType })
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: return@composable
             viewModel.getProductById(id)?.let { prod ->
                 DetailsScreen(
                     product = prod,
                     navController = nav,
-                    viewModel     = viewModel,
+                    viewModel = viewModel,
                     onAddToCart = { selected ->
                         val ok = cartVM.addToCart(prod, selected)
                         if (ok) nav.navigate(Routes.Cart)
@@ -72,6 +76,23 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateToCart = { nav.navigate(Routes.Cart) }
             )
         }
-
+        composable(Routes.CategorySelection) {
+            CategorySelectionScreen(
+                onCategorySelected = { category ->
+                    nav.navigate("${Routes.CategoryProducts}/$category")
+                }
+            )
+        }
+        composable(
+            "${Routes.CategoryProducts}/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: ""
+            CategoryProductsScreen(
+                viewModel = viewModel,
+                category = category,
+                onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") }
+            )
+        }
     }
 }
