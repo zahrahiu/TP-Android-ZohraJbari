@@ -22,8 +22,8 @@
     "type": "LAVENDER",
     "colors": ["PURPLE"],
     "occasions": ["THANKS", "BIRTHDAY"],
-    "discountPercent": 30,
-    "offerEnd": 1753144799000
+    "discountPercent": 50,
+    "offerEnd": 1053200799012
   },
   {
     "productID": "FL003",
@@ -35,8 +35,8 @@
     "type": "LILY",
     "colors": ["WHITE"],
     "occasions": ["WEDDING", "ANNIVERSARY"],
-    "discountPercent": 30,
-    "offerEnd": 1753144799000
+    "discountPercent": 20,
+    "offerEnd": 1098141299020
   },
   {
     "productID": "FL004",
@@ -70,8 +70,8 @@
     "type": "TULIP",
     "colors": ["MULTICOLOR"],
     "occasions": ["BIRTHDAY", "THANKS"],
-    "discountPercent": 30,
-    "offerEnd": 1753144799000
+    "discountPercent": 20,
+    "offerEnd": 1151244709000
   },
   {
     "productID": "FL007",
