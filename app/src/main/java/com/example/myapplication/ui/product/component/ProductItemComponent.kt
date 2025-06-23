@@ -1,3 +1,4 @@
+// ui/product/component/ProductItem.kt
 package com.example.myapplication.ui.product.component
 
 import androidx.compose.foundation.Image
@@ -35,177 +36,154 @@ fun ProductItem(
     onFavoriteClick: () -> Unit,
     onRateProduct: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    showRating: Boolean = true,
+    showRating: Boolean = true
 ) {
+    /* ---------- Resources ---------- */
     val imgRes = getImageResource(product.image)
 
-    /* --------- Prix --------- */
-    fun parsePrice(str: String): Float =
-        str.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
+    /* ---------- Prices ---------- */
+    fun parsePrice(s: String) = s.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
     val oldPrice = parsePrice(product.price)
     val newPrice = product.discountPercent?.let { oldPrice * (100 - it) / 100f }
 
-    /* --------- Date --------- */
-    val promoDate = remember(product.offerEndEpochMillis) {
-        product.offerEndEpochMillis?.let { end ->
-            Instant.ofEpochMilli(end)
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("dd MMM yyyy • HH:mm"))
-        }
+    /* ---------- Offer date ---------- */
+    val promoDate = product.offerEndEpochMillis?.let {
+        Instant.ofEpochMilli(it)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("dd MMM yyyy • HH:mm"))
     }
 
-    /* --------- Card --------- */
+
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(0.8f)
-            .clickable(onClick = onItemClick),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(Color(0xFFFDF6F0)),
+        colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Box(Modifier.fillMaxSize()) {
+        Column(
+            Modifier
+                .clickable(onClick = onItemClick)
+                .padding(8.dp)
+        ) {
 
-            Column(
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
             ) {
+                Image(
+                    painter = painterResource(imgRes),
+                    contentDescription = product.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                )
 
-                /* ------- Image + Date ------- */
-                Box(contentAlignment = Alignment.TopCenter) {
-                    Image(
-                        painter = painterResource(imgRes),
-                        contentDescription = product.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                    )
-
-                    if (promoDate != null) {
-                        TimerBox(
-                            date = promoDate,
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .offset(y = 76.dp)
-                        )
+                /* % badge */
+                product.discountPercent?.let {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(6.dp)
+                            .background(Color(0xFFDC143C), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text("-$it%", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-                Spacer(Modifier.width(2.dp))
 
-
-                /* ------- Infos ------- */
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                    Text(
-                        product.name,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF5D4037),
-                        maxLines = 1
+                /* favorite */
+                IconButton(
+                    onClick = onFavoriteClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .size(22.dp)
+                ) {
+                    Icon(
+                        painterResource(
+                            if (isFavorite) R.drawable.ic_favorite_filled
+                            else R.drawable.ic_favorite_outline
+                        ),
+                        contentDescription = null,
+                        tint = Color.Unspecified
                     )
-
-                    /* --- Prix --- */
-                    if (newPrice != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                "%.0f DH".format(oldPrice),
-                                fontSize = 14.sp,
-                                color = Color(0xFF8D6E63),
-                                textDecoration = TextDecoration.LineThrough
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                "%.0f DH".format(newPrice),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFDC143C)
-                            )
-                        }
-                    } else {
-                        Text(product.price, fontSize = 14.sp, color = Color(0xFF8D6E63))
-                    }
-
-                    /* --- Rating --- */
-                    if (showRating) {
-                        RatingBar(
-                            rating = product.rating,
-                            onRate = onRateProduct,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
                 }
             }
 
-            /* ------- Badge -% ------- */
-            if (product.discountPercent != null) {
+            /* ======== Timer (date only) ======== */
+            promoDate?.let {
                 Box(
-                    Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                        .background(Color(0xFFDC143C), RoundedCornerShape(6.dp))
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .background(Color.White, RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFDC143C), RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
-                    Text(
-                        "-${product.discountPercent}%",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = Color(0xFFDC143C),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(it, fontSize = 11.sp, color = Color(0xFFDC143C), fontWeight = FontWeight.Medium)
+                    }
                 }
             }
 
-            /* ------- Favorite Button ------- */
-            IconButton(
-                onClick = onFavoriteClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(24.dp)
-            ) {
-                Icon(
-                    painterResource(
-                        if (isFavorite) R.drawable.ic_favorite_filled
-                        else R.drawable.ic_favorite_outline
-                    ),
-                    contentDescription = null,
-                    tint = Color.Unspecified                   )
+            /* ======== Title ======== */
+            Text(
+                product.name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF5D4037),
+                modifier = Modifier.padding(top = 6.dp)
+            )
+
+            /* ======== Price ======== */
+            if (newPrice != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Text(
+                        "%.0f DH".format(oldPrice),
+                        fontSize = 13.sp,
+                        color = Color(0xFF8D6E63),
+                        textDecoration = TextDecoration.LineThrough
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "%.0f DH".format(newPrice),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFDC143C)
+                    )
+                }
+            } else {
+                Text(
+                    product.price,
+                    fontSize = 14.sp,
+                    color = Color(0xFF8D6E63),
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+
+            /* ======== Rating ======== */
+            if (showRating) {
+                RatingBar(
+                    rating = product.rating,
+                    onRate = onRateProduct,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
             }
         }
     }
 }
 
-/* -------- TimerBox (Affiche date uniquement) -------- */
-@Composable
-private fun TimerBox(date: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color.White, RoundedCornerShape(8.dp))
-            .border(1.dp, Color(0xFFDC143C), RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.AccessTime,
-                contentDescription = null,
-                tint = Color(0xFFDC143C),
-                modifier = Modifier.size(12.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = date,
-                fontSize = 11.sp,
-                color = Color(0xFFDC143C),
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-/* -------- Image helper -------- */
 private fun getImageResource(name: String): Int = when (name) {
     "hibiscus.jpg" -> R.drawable.hibiscus
     "lavender.jpg" -> R.drawable.lavender

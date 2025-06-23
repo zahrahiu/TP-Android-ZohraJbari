@@ -21,6 +21,8 @@ fun ProductsList(
     onToggleFavorite: (Product) -> Unit  ,
     onRateProduct: (String, Int) -> Unit
 ) {
+
+    
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier

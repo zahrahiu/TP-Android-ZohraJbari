@@ -1,9 +1,10 @@
 package com.example.emtyapp.ui.product.screens
 
-import com.google.accompanist.flowlayout.FlowRow
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,10 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.emtyapp.nav.Routes
-import com.example.myapplication.ui.product.ProductIntent
+import com.google.accompanist.flowlayout.FlowRow
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
-import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.component.QuickFilter
+import com.example.myapplication.ui.product.component.QuickFilterImage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -32,8 +34,8 @@ fun HomeScreen(
     viewModel: ProductViewModel = viewModel(),
     onNavigateToDetails: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
-    onNavigateToCart: () -> Unit,           // ← هنا ضفت callback جديد
-    currentRoute: String = Routes.Home      // ← باش نعرفو الصفحة الحالية (اختياري)
+    onNavigateToCart: () -> Unit,
+    currentRoute: String = Routes.Home
 ) {
     val state       by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
@@ -56,6 +58,7 @@ fun HomeScreen(
     var aColors     by remember { mutableStateOf(setOf<String>()) }
     var aPriceRange by remember { mutableStateOf(0f..400f) }
 
+    var selectedQuickFilter by remember { mutableStateOf<QuickFilter?>(null) }
 
     fun parsePrice(min: String, max: String): ClosedFloatingPointRange<Float> {
         val mn = min.toFloatOrNull() ?: 0f
@@ -63,6 +66,7 @@ fun HomeScreen(
         return if (mn <= mx) mn..mx else mx..mn
     }
 
+    // Filtrage classique (search + filtres avancés)
     val filtered = state.products.filter { p ->
         val matchesSearch   = searchQuery.isBlank() ||
                 p.name.contains(searchQuery, true) ||
@@ -74,6 +78,18 @@ fun HomeScreen(
             .toFloatOrNull() ?: 0f
         val matchesPrice    = priceValue in aPriceRange
         matchesSearch && matchesType && matchesOccasion && matchesColor && matchesPrice
+    }
+
+    // Filtrage rapide (QuickFilter)
+    val quickFilteredProducts = when (selectedQuickFilter) {
+        QuickFilter.GIFT -> filtered.filter { "GIFT" in it.occasions }
+        QuickFilter.MULTICOLOR -> filtered.filter { "MULTICOLOR" in it.colors }
+        QuickFilter.BASKET -> filtered.filter {
+            it.description.contains("panier", ignoreCase = true) ||
+                    it.description.contains("arrangement", ignoreCase = true) ||
+                    it.description.contains("chbka", ignoreCase = true)
+        }
+        null -> filtered
     }
 
     Scaffold(
@@ -88,7 +104,7 @@ fun HomeScreen(
             NavigationBar(containerColor = Color(0xFFFFF8F0)) {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
-                    onClick = { },
+                    onClick = { /* gérer navigation si besoin */ },
                     icon  = { Text("🏠", fontSize = 20.sp) },
                     label = { Text("Home") }
                 )
@@ -108,8 +124,12 @@ fun HomeScreen(
         }
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
+            // Recherche + bouton filtres avancés
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -136,7 +156,7 @@ fun HomeScreen(
                             Modifier.rotate(if(showFilters)180f else 0f))
                     },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
+                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
                         selectedLabelColor     = Color(0xFFDC4C3E)
                     )
                 )
@@ -144,6 +164,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Filtrage avancé (expandable)
             AnimatedVisibility(
                 visible = showFilters,
                 enter   = fadeIn() + expandVertically(),
@@ -164,7 +185,7 @@ fun HomeScreen(
                                 onClick  = { tab = if (tab == t) null else t },
                                 label    = { Text(t) },
                                 colors   = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
+                                    selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
                                     selectedLabelColor     = Color(0xFFDC4C3E)
                                 )
                             )
@@ -181,7 +202,7 @@ fun HomeScreen(
                                     onClick  = { tType = if (tType == t) null else t },
                                     label    = { Text(t) },
                                     colors   = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
+                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
                                         selectedLabelColor     = Color(0xFFDC4C3E)
                                     )
                                 )
@@ -196,7 +217,7 @@ fun HomeScreen(
                                     },
                                     label    = { Text(c) },
                                     colors   = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
+                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
                                         selectedLabelColor     = Color(0xFFDC4C3E)
                                     )
                                 )
@@ -209,7 +230,7 @@ fun HomeScreen(
                                     onClick  = { tOccasion = if (tOccasion == o) null else o },
                                     label    = { Text(o) },
                                     colors   = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(.2f),
+                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
                                         selectedLabelColor     = Color(0xFFDC4C3E)
                                     )
                                 )
@@ -254,17 +275,38 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Rangée scrollable des images QuickFilter avec border si selected
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp) // padding horizontal pour scrolling
+            ) {
+                items(QuickFilter.values()) { filter ->
+                    QuickFilterImage(
+                        filter = filter,
+                        isSelected = selectedQuickFilter == filter,
+                        onClick = {
+                            selectedQuickFilter = if (selectedQuickFilter == filter) null else filter
+                        }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
             Box(Modifier.weight(1f)) {
                 when {
                     state.isLoading       -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
                     state.error != null   -> Center { Text("Erreur: ${state.error}", color = Color.Red) }
-                    filtered.isEmpty()    -> Center { Text("Aucun produit trouvé") }
+                    quickFilteredProducts.isEmpty() -> Center { Text("Aucun produit trouvé") }
                     else -> ProductsList(
-                        products            = filtered,
-                        favoriteProductIds  = favoriteIds,            // ✅
+                        products            = quickFilteredProducts,
+                        favoriteProductIds  = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite    = viewModel::toggleFavorite  ,
-                        onRateProduct = { productId, newRating ->
+                        onToggleFavorite    = viewModel::toggleFavorite,
+                        onRateProduct       = { productId, newRating ->
                             viewModel.updateProductRating(productId, newRating)
                         }
                     )
@@ -273,7 +315,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 @Composable
 fun Center(content: @Composable BoxScope.() -> Unit) {
