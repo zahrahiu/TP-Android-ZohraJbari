@@ -31,6 +31,8 @@ fun FavoritesScreen(
     onNavigateToDetails: (String) -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToFavorites: () -> Unit,
+    onNavigateToCategory: () -> Unit,
+
     onNavigateToCart: () -> Unit       // ← زدت هاد callback جديد
 ) {
     val state       by viewModel.state.collectAsState()
@@ -93,6 +95,12 @@ fun FavoritesScreen(
                     onClick = onNavigateToHome,
                     icon = { Text("🏠", fontSize = 20.sp) },
                     label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToCategory,
+                    icon = { Text("🪷", fontSize = 20.sp) },
+                    label = { Text("Catégories") }
                 )
                 NavigationBarItem(
                     selected = true,

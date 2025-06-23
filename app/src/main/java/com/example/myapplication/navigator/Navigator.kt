@@ -48,8 +48,11 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
                 onNavigateToHome = { nav.navigate(Routes.Home) },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
-                onNavigateToCart = { nav.navigate(Routes.Cart) }
-            )
+                onNavigateToCart = { nav.navigate(Routes.Cart) },
+                onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
+
+                )
+
         }
         composable("${Routes.ProductDetail}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.StringType })
@@ -73,8 +76,10 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 viewModel = cartVM,
                 onNavigateToHome = { nav.navigate(Routes.Home) },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
-                onNavigateToCart = { nav.navigate(Routes.Cart) }
-            )
+                onNavigateToCart = { nav.navigate(Routes.Cart) },
+                onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
+
+                )
         }
         composable(Routes.CategorySelection) {
             CategorySelectionScreen(

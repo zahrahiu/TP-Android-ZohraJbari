@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
@@ -34,6 +35,7 @@ fun CartScreen(
     viewModel: CartViewModel,
     onNavigateToHome: () -> Unit,
     onNavigateToFavorites: () -> Unit,
+    onNavigateToCategory: () -> Unit,
     onNavigateToCart: () -> Unit
 ) {
     val items = viewModel.items.collectAsState().value
@@ -44,8 +46,17 @@ fun CartScreen(
         return priceStr.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
     }
 
+    fun calculateDiscountedPrice(price: Float, discountPercent: Int?): Float {
+        return if (discountPercent != null) {
+            price * (100 - discountPercent) / 100
+        } else {
+            price
+        }
+    }
+
     val totalPrice = items.sumOf { ci ->
-        val productPrice = parsePrice(ci.product.price).toDouble()
+        val originalPrice = parsePrice(ci.product.price).toDouble()
+        val productPrice = calculateDiscountedPrice(originalPrice.toFloat(), ci.product.discountPercent).toDouble()
         val addonsPrice = ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
         productPrice * ci.quantity + addonsPrice
     }
@@ -64,6 +75,12 @@ fun CartScreen(
                     onClick = onNavigateToHome,
                     icon = { Text("🏠", fontSize = 20.sp) },
                     label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToCategory,
+                    icon = { Text("🪷", fontSize = 20.sp) },
+                    label = { Text("Catégories") }
                 )
                 NavigationBarItem(
                     selected = false,
@@ -116,6 +133,8 @@ fun CartScreen(
                 items(items) { ci ->
                     val maxStock = ci.product.quantity.toIntOrNull() ?: Int.MAX_VALUE
                     val outOfStock = ci.quantity >= maxStock
+                    val originalPrice = parsePrice(ci.product.price)
+                    val discountedPrice = calculateDiscountedPrice(originalPrice, ci.product.discountPercent)
 
                     Card(
                         Modifier
@@ -138,7 +157,23 @@ fun CartScreen(
                                         .padding(start = 12.dp)
                                 ) {
                                     Text(ci.product.name, color = GrisPetitGris, fontWeight = FontWeight.SemiBold)
-                                    Text(ci.product.price, color = GrisPetitGris)
+
+                                    // Display price with discount if available
+                                    if (ci.product.discountPercent != null) {
+                                        Text(
+                                            "${discountedPrice.toInt()} DH",
+                                            color = RougeFlora,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            "${originalPrice.toInt()} DH",
+                                            color = GrisPetitGris,
+                                            textDecoration = TextDecoration.LineThrough
+                                        )
+                                    } else {
+                                        Text("${originalPrice.toInt()} DH", color = GrisPetitGris)
+                                    }
+
                                     if (outOfStock)
                                         Text(
                                             "Stock insuffisant",
