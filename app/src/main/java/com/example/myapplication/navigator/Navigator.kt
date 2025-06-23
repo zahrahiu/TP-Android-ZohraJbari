@@ -24,44 +24,38 @@ object Routes {
 
 @Composable
 fun AppNavigation(viewModel: ProductViewModel) {
-    val nav     = rememberNavController()
-    val cartVM  = remember { CartViewModel() }
+    val nav = rememberNavController()
+    val cartVM = remember { CartViewModel() }
 
-    NavHost(nav, Routes.Home) {
-
-        /* Home */
+    NavHost(navController = nav, startDestination = Routes.Home) {
         composable(Routes.Home) {
             HomeScreen(
-                viewModel               = viewModel,
-                onNavigateToDetails     = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
-                onNavigateToFavorites   = { nav.navigate(Routes.Favorites) }
+                viewModel = viewModel,
+                onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
+                onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
+                onNavigateToCart = { nav.navigate(Routes.Cart) },
+                currentRoute = Routes.Home
             )
         }
-
-        /* Favoris */
         composable(Routes.Favorites) {
-            val state  by viewModel.state.collectAsState()
-            val favIds by viewModel.favoriteIds.collectAsState()
-
             FavoritesScreen(
                 viewModel = viewModel,
                 onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
                 onNavigateToHome = { nav.navigate(Routes.Home) },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
+                onNavigateToCart = { nav.navigate(Routes.Cart) }
             )
         }
 
-        /* Details */
-        composable(
-            "${Routes.ProductDetail}/{id}",
+        composable("${Routes.ProductDetail}/{id}",
             arguments = listOf(navArgument("id"){ type = NavType.StringType })
-        ) { back ->
-            val id = back.arguments?.getString("id") ?: return@composable
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: return@composable
             viewModel.getProductById(id)?.let { prod ->
                 DetailsScreen(
-                    product       = prod,
+                    product = prod,
                     navController = nav,
-                    onAddToCart   = { selected ->
+                    onAddToCart = { selected ->
                         val ok = cartVM.addToCart(prod, selected)
                         if (ok) nav.navigate(Routes.Cart)
                         ok
@@ -69,10 +63,14 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 )
             } ?: Text("Produit introuvable")
         }
-
-        /* Cart */
         composable(Routes.Cart) {
-            CartScreen(cartVM)
+            CartScreen(
+                viewModel = cartVM,
+                onNavigateToHome = { nav.navigate(Routes.Home) },
+                onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
+                onNavigateToCart = { nav.navigate(Routes.Cart) }
+            )
         }
+
     }
 }

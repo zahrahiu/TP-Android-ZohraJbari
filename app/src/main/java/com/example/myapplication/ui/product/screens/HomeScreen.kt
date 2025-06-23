@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.emtyapp.nav.Routes
 import com.example.myapplication.ui.product.ProductIntent
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
@@ -30,7 +31,9 @@ import com.example.myapplication.data.Entities.Product
 fun HomeScreen(
     viewModel: ProductViewModel = viewModel(),
     onNavigateToDetails: (String) -> Unit,
-    onNavigateToFavorites: () -> Unit
+    onNavigateToFavorites: () -> Unit,
+    onNavigateToCart: () -> Unit,           // ← هنا ضفت callback جديد
+    currentRoute: String = Routes.Home      // ← باش نعرفو الصفحة الحالية (اختياري)
 ) {
     val state       by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
@@ -85,17 +88,26 @@ fun HomeScreen(
         bottomBar = {
             NavigationBar(containerColor = Color(0xFFFFF8F0)) {
                 NavigationBarItem(
-                    selected = true,
-                    onClick = { /* راه Home */ },
+                    selected = currentRoute == Routes.Home,
+                    onClick = { },
                     icon  = { Text("🏠", fontSize = 20.sp) },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
-                    selected = false, onClick = onNavigateToFavorites,
-                    icon = { Text("❤", fontSize = 20.sp) }, label = { Text("Favoris") }
+                    selected = currentRoute == Routes.Favorites,
+                    onClick = onNavigateToFavorites,
+                    icon = { Text("❤", fontSize = 20.sp) },
+                    label = { Text("Favoris") }
                 )
-            }}
-    ){ padding ->
+                NavigationBarItem(
+                    selected = currentRoute == Routes.Cart,
+                    onClick = onNavigateToCart,
+                    icon = { Text("🛒", fontSize = 20.sp) },
+                    label = { Text("Panier") }
+                )
+            }
+        }
+    ) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
         ) {

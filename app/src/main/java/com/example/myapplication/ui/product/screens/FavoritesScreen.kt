@@ -31,7 +31,7 @@ fun FavoritesScreen(
     onNavigateToDetails: (String) -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToFavorites: () -> Unit,
-
+    onNavigateToCart: () -> Unit       // ← زدت هاد callback جديد
 ) {
     val state       by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
@@ -90,18 +90,27 @@ fun FavoritesScreen(
         bottomBar = {
             NavigationBar(containerColor = Color(0xFFFFF8F0)) {
                 NavigationBarItem(
-                    selected = true,
-                    onClick = { /* راه Home */ },
-                    icon  = { Text("🏠", fontSize = 20.sp) },
+                    selected = false,
+                    onClick = onNavigateToHome,
+                    icon = { Text("🏠", fontSize = 20.sp) },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
-                    selected = false, onClick = onNavigateToFavorites,
-                    icon = { Text("❤", fontSize = 20.sp) }, label = { Text("Favoris") }
+                    selected = true,
+                    onClick = onNavigateToFavorites,
+                    icon = { Text("❤", fontSize = 20.sp) },
+                    label = { Text("Favoris") }
                 )
-            }},
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToCart,
+                    icon = { Text("🛒", fontSize = 20.sp) },
+                    label = { Text("Panier") }
+                )
+            }
+        },
         containerColor = Color(0xFFFFFBF7)
-    ) { padding ->
+    ){ padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
         ) {
