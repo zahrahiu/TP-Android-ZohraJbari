@@ -94,6 +94,8 @@ fun ProductItem(
                         )
                     }
                 }
+                Spacer(Modifier.width(2.dp))
+
 
                 /* ------- Infos ------- */
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

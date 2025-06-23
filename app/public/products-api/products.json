@@ -34,9 +34,8 @@
     "productPrice": "300 DH",
     "type": "LILY",
     "colors": ["WHITE"],
-    "occasions": ["WEDDING", "ANNIVERSARY"],
-    "discountPercent": 20,
-    "offerEnd": 1053200799012
+    "occasions": ["WEDDING", "ANNIVERSARY"]
+
   },
   {
     "productID": "FL004",
