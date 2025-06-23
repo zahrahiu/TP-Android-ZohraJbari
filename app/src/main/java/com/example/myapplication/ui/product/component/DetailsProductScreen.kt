@@ -159,8 +159,12 @@ fun DetailsScreen(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
+            ProductRatingSection(
+                product = product,
+                onRate = { newRating ->
+                    viewModel.updateProductRating(product.id, newRating)
+                }
+            )
 
             /* -------- Detail card -------- */
             Card(
@@ -288,6 +292,9 @@ fun DetailsScreen(
                             },
                             onFavoriteClick = {
                                 viewModel.toggleFavorite(simProd)
+                            },
+                            onRateProduct = { newRating ->
+                                viewModel.updateProductRating(simProd.id, newRating)
                             },
                             modifier = Modifier
                                 .width(180.dp)

@@ -18,19 +18,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.component.RatingBar
 import kotlinx.coroutines.delay
 
+// ui/product/component/ProductItem.kt
 @Composable
 fun ProductItem(
     product: Product,
     isFavorite: Boolean,
     onItemClick: () -> Unit,
     onFavoriteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onRateProduct: (Int) -> Unit,
+
+    modifier: Modifier = Modifier,
+    showRating: Boolean = true
+
 ) {
     val imageRes = getImageResource(product.image)
 
-    // 1. Calcul du nouveau prix si discount
     fun parsePrice(str: String): Float =
         str.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
 
@@ -39,7 +44,6 @@ fun ProductItem(
         oldPrice * (100 - p) / 100f
     }
 
-    // 2. Compte à rebours dynamique (timer)
     val remaining by produceState<String?>(initialValue = null, product.offerEndEpochMillis) {
         val end = product.offerEndEpochMillis ?: return@produceState
         while (true) {
@@ -51,7 +55,7 @@ fun ProductItem(
             val h = diff / 3_600_000
             val m = (diff / 60_000) % 60
             value = String.format("%02dh %02dm", h, m)
-            delay(60_000) // actualise chaque minute
+            delay(60_000)
         }
     }
 
@@ -65,7 +69,6 @@ fun ProductItem(
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(Modifier.fillMaxSize()) {
-
             Column(
                 Modifier
                     .padding(12.dp)
@@ -73,7 +76,6 @@ fun ProductItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Image du produit
                 Image(
                     painterResource(imageRes),
                     contentDescription = product.name,
@@ -83,7 +85,6 @@ fun ProductItem(
                         .clip(CircleShape)
                 )
 
-                // Nom et prix
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         product.name,
@@ -117,7 +118,6 @@ fun ProductItem(
                         )
                     }
 
-                    // Timer si offre valide
                     remaining?.let {
                         Text(
                             it,
@@ -126,10 +126,19 @@ fun ProductItem(
                             modifier = Modifier.padding(top = 2.dp)
                         )
                     }
+
+                    // Ajout de la RatingBar ici
+                    if (showRating && product.rating > 0) {
+                        RatingBar(
+                            rating = product.rating,
+                            onRate = onRateProduct,
+                            readOnly = false,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
                 }
             }
 
-            // Badge de réduction (visible seulement si offre en cours)
             if (product.discountPercent != null && remaining != null) {
                 Box(
                     Modifier
@@ -147,7 +156,6 @@ fun ProductItem(
                 }
             }
 
-            // Bouton favoris en haut à droite
             IconButton(
                 onClick = onFavoriteClick,
                 modifier = Modifier

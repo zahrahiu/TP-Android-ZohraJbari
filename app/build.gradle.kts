@@ -64,7 +64,9 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-flowlayout:0.31.5-beta")
 
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
-
+// Pour DataStore
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("androidx.datastore:datastore-core:1.0.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

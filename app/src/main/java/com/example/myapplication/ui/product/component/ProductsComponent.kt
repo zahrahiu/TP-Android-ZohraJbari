@@ -18,8 +18,9 @@ fun ProductsList(
     products: List<Product>,
     onNavigateToDetails: (String) -> Unit,
     modifier: Modifier = Modifier,
-    favoriteProductIds: Set<String>,               // IDs des produits favoris
-    onToggleFavorite: (Product) -> Unit             // Callback pour toggle favoris
+    favoriteProductIds: Set<String>,
+    onToggleFavorite: (Product) -> Unit  ,
+    onRateProduct: (String, Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -36,7 +37,13 @@ fun ProductsList(
                 product = product,
                 isFavorite     = favoriteProductIds.contains(product.id),
                 onItemClick    = { onNavigateToDetails(product.id) },
-                onFavoriteClick= { onToggleFavorite(product) }           // ⇐
+                onFavoriteClick= { onToggleFavorite(product) } ,
+                onRateProduct = { newRating ->
+                    onRateProduct(product.id, newRating)
+                }
+
+
+
             )
 
         }

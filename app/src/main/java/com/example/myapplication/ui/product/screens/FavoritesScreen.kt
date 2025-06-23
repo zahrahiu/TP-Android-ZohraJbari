@@ -54,7 +54,6 @@ fun FavoritesScreen(
     var aColors     by remember { mutableStateOf(setOf<String>()) }
     var aPriceRange by remember { mutableStateOf(0f..400f) }
 
-    LaunchedEffect(Unit) { viewModel.handleIntent(ProductIntent.LoadProducts) }
 
     fun parsePrice(min: String, max: String): ClosedFloatingPointRange<Float> {
         val mn = min.toFloatOrNull() ?: 0f
@@ -263,7 +262,10 @@ fun FavoritesScreen(
                         products            = filtered,
                         favoriteProductIds  = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite    = viewModel::toggleFavorite
+                        onToggleFavorite    = viewModel::toggleFavorite,
+                        onRateProduct = { productId, newRating ->
+                            viewModel.updateProductRating(productId, newRating)
+                        }
                     )
                 }
             }

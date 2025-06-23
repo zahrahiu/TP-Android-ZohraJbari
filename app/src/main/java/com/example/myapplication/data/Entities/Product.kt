@@ -25,7 +25,6 @@ data class Product(
     val discountPercent: Int?  ,
     @SerializedName("offerEnd")
     val offerEndEpochMillis: Long?,
-    
-
+    val rating: Int = 0
 
 )
