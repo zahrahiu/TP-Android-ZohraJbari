@@ -11,7 +11,7 @@
     "occasions": ["LOVE", "ANNIVERSARY"],
     "discountPercent": 30,
     "offerEnd": 1753144799000,
-    "category": "FLEURS"
+    "category": "ARRANGEMENT"
   },
   {
     "productID": "FL002",
@@ -25,7 +25,7 @@
     "occasions": ["THANKS", "BIRTHDAY"],
     "discountPercent": 50,
     "offerEnd": 1053200799012,
-    "category": "FLEURS"
+    "category": "ARRANGEMENT"
   },
   {
     "productID": "FL003",
@@ -75,7 +75,7 @@
     "occasions": ["BIRTHDAY", "THANKS"],
     "discountPercent": 20,
     "offerEnd": 1151244709000,
-    "category": "FLEURS"
+    "category": "ROSES"
   },
   {
     "productID": "FL007",
@@ -87,7 +87,7 @@
     "type": "ORCHID",
     "colors": ["PURPLE"],
     "occasions": ["WEDDING", "ANNIVERSARY"],
-    "category": "EN_POT"
+    "category": "ROSES"
   },
   {
     "productID": "FL008",

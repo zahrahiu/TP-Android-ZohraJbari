@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -27,8 +27,6 @@ import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
 import com.example.myapplication.ui.product.component.QuickFilter
 import com.example.myapplication.ui.product.component.QuickFilterImage
-
-// ------------ HomeScreen -------------
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -136,6 +134,7 @@ fun HomeScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
+            // Barre recherche + bouton filtres
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -170,6 +169,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Zone filtres animés
             AnimatedVisibility(
                 visible = showFilters,
                 enter = fadeIn() + expandVertically(),
@@ -280,6 +280,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Quick filter (LazyRow horizontal)
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -298,9 +299,7 @@ fun HomeScreen(
                 }
             }
 
-
-
-
+            // Texte "Trouve ta fleur préférée"
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -317,6 +316,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // Container avec poids 1 pour forcer hauteur et éviter conflit scroll
             Box(Modifier.weight(1f)) {
                 when {
                     state.isLoading -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
@@ -327,9 +327,7 @@ fun HomeScreen(
                         favoriteProductIds = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
                         onToggleFavorite = viewModel::toggleFavorite,
-                        onRateProduct = { productId, newRating ->
-                            viewModel.updateProductRating(productId, newRating)
-                        }
+                        onRateProduct = { productId, newRating -> viewModel.updateProductRating(productId, newRating) }
                     )
                 }
             }
