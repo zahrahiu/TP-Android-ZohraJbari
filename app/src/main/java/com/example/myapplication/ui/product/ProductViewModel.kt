@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 @HiltViewModel
 class ProductViewModel @Inject constructor(
@@ -27,6 +28,8 @@ class ProductViewModel @Inject constructor(
             else
                 _favoriteIds.value + product.id
     }
+
+
 
     fun getProductById(id: String): Product? {
         return _state.value.products.find { it.id == id }

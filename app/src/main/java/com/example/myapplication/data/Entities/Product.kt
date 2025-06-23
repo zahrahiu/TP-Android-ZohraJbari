@@ -22,7 +22,10 @@ data class Product(
     @SerializedName("occasions")
     val occasions: List<String>,
     @SerializedName("discountPercent")
-    val discountPercent: Int?  = null,
+    val discountPercent: Int?  ,
     @SerializedName("offerEnd")
-    val offerEndEpochMillis: Long? = null
+    val offerEndEpochMillis: Long?,
+    
+
+
 )
