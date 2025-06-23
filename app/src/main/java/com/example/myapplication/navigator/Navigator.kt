@@ -80,9 +80,14 @@ fun AppNavigation(viewModel: ProductViewModel) {
             CategorySelectionScreen(
                 onCategorySelected = { category ->
                     nav.navigate("${Routes.CategoryProducts}/$category")
-                }
+                },
+                onNavigateHome = { nav.navigate(Routes.Home) },
+                onNavigateFavorites = { nav.navigate(Routes.Favorites) },
+                onNavigateCart = { nav.navigate(Routes.Cart) },
+                currentRoute = Routes.CategorySelection
             )
         }
+
         composable(
             "${Routes.CategoryProducts}/{category}",
             arguments = listOf(navArgument("category") { type = NavType.StringType })
@@ -91,8 +96,15 @@ fun AppNavigation(viewModel: ProductViewModel) {
             CategoryProductsScreen(
                 viewModel = viewModel,
                 category = category,
-                onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") }
+                onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
+                onNavigateHome = { nav.navigate(Routes.Home) },
+                onNavigateFavorites = { nav.navigate(Routes.Favorites) },
+                onNavigateCart = { nav.navigate(Routes.Cart) },
+                onNavigateCategories = { nav.navigate(Routes.CategorySelection) },
+                currentRoute = Routes.CategoryProducts
             )
         }
+
+
     }
 }

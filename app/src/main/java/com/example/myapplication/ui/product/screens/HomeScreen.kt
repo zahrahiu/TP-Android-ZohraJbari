@@ -298,14 +298,8 @@ fun HomeScreen(
                 }
             }
 
-            Button(
-                onClick = onNavigateToCategory,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("🪷 Découvrir les catégories spéciales")
-            }
 
-            Spacer(Modifier.height(8.dp))
+
 
             Box(
                 modifier = Modifier

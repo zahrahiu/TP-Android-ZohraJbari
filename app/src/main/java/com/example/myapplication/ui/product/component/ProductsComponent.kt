@@ -22,7 +22,9 @@ fun ProductsList(
     onRateProduct: (String, Int) -> Unit
 ) {
 
-    
+
+
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier
@@ -31,6 +33,7 @@ fun ProductsList(
         contentPadding = PaddingValues(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
+
     ) {
         items(products) { product ->
 

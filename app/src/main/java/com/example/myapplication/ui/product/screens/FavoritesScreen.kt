@@ -259,14 +259,15 @@ fun FavoritesScreen(
                     favProducts.isEmpty()  -> Center { Text("Aucun produit favori pour le moment.") }
                     filtered.isEmpty()     -> Center { Text("Filtre vide") }
                     else -> ProductsList(
-                        products            = filtered,
-                        favoriteProductIds  = favoriteIds,
+                        products = filtered,
+                        favoriteProductIds = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite    = viewModel::toggleFavorite,
+                        onToggleFavorite = viewModel::toggleFavorite,
                         onRateProduct = { productId, newRating ->
                             viewModel.updateProductRating(productId, newRating)
                         }
                     )
+
                 }
             }
         }
