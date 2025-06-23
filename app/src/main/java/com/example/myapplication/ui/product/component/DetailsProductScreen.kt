@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.product.component
 
-import ProductItem
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
