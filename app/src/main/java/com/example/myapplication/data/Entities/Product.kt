@@ -20,5 +20,9 @@ data class Product(
     @SerializedName("colors")
     val colors: List<String>,
     @SerializedName("occasions")
-    val occasions: List<String>
+    val occasions: List<String>,
+    @SerializedName("discountPercent")
+    val discountPercent: Int?  = null,
+    @SerializedName("offerEnd")
+    val offerEndEpochMillis: Long? = null
 )

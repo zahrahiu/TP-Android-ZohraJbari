@@ -1,4 +1,5 @@
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,10 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Product
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProductItem(
@@ -24,8 +27,33 @@ fun ProductItem(
     onItemClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier
-)  {
+) {
     val imageRes = getImageResource(product.image)
+
+    // 1. Calcul du nouveau prix si discount
+    fun parsePrice(str: String): Float =
+        str.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
+
+    val oldPrice = parsePrice(product.price)
+    val newPrice: Float? = product.discountPercent?.let { p ->
+        oldPrice * (100 - p) / 100f
+    }
+
+    // 2. Compte à rebours dynamique (timer)
+    val remaining by produceState<String?>(initialValue = null, product.offerEndEpochMillis) {
+        val end = product.offerEndEpochMillis ?: return@produceState
+        while (true) {
+            val diff = (end - System.currentTimeMillis()).coerceAtLeast(0)
+            if (diff == 0L) {
+                value = null
+                break
+            }
+            val h = diff / 3_600_000
+            val m = (diff / 60_000) % 60
+            value = String.format("%02dh %02dm", h, m)
+            delay(60_000) // actualise chaque minute
+        }
+    }
 
     Card(
         modifier = modifier
@@ -33,19 +61,21 @@ fun ProductItem(
             .aspectRatio(0.8f)
             .clickable(onClick = onItemClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF6F0)),
+        colors = CardDefaults.cardColors(Color(0xFFFDF6F0)),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize()) {
+
             Column(
-                modifier = Modifier
+                Modifier
                     .padding(12.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+                // Image du produit
                 Image(
-                    painter = painterResource(id = imageRes),
+                    painterResource(imageRes),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -53,38 +83,85 @@ fun ProductItem(
                         .clip(CircleShape)
                 )
 
+                // Nom et prix
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = product.name,
+                        product.name,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF5D4037),
                         maxLines = 1
                     )
+
+                    if (newPrice != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                String.format("%.0f DH", oldPrice),
+                                fontSize = 14.sp,
+                                color = Color(0xFF8D6E63),
+                                textDecoration = TextDecoration.LineThrough
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                String.format("%.0f DH", newPrice),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFDC143C)
+                            )
+                        }
+                    } else {
+                        Text(
+                            product.price,
+                            fontSize = 14.sp,
+                            color = Color(0xFF8D6E63)
+                        )
+                    }
+
+                    // Timer si offre valide
+                    remaining?.let {
+                        Text(
+                            it,
+                            fontSize = 12.sp,
+                            color = Color.Red,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+            }
+
+            // Badge de réduction (visible seulement si offre en cours)
+            if (product.discountPercent != null && remaining != null) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .background(Color(0xFFDC143C), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
                     Text(
-                        text = product.price,
-                        fontSize = 14.sp,
-                        color = Color(0xFF8D6E63),
-                        modifier = Modifier.padding(top = 4.dp)
+                        "-${product.discountPercent}%",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
 
             // Bouton favoris en haut à droite
             IconButton(
-                onClick = onFavoriteClick,                       // ⇐
-                modifier = Modifier.align(Alignment.TopEnd)
-                    .padding(8.dp).size(24.dp)
-            )  {
+                onClick = onFavoriteClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+            ) {
                 Icon(
-                    painter = painterResource(
+                    painterResource(
                         if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_outline
                     ),
-                    contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                    contentDescription = null,
                     tint = Color.Unspecified
                 )
-
-
             }
         }
     }
@@ -96,6 +173,11 @@ private fun getImageResource(productImage: String): Int {
         "lavender.jpg" -> R.drawable.lavender
         "lily.jpg" -> R.drawable.lily
         "pansy.jpg" -> R.drawable.pansy
+        "img1.jpg" -> R.drawable.img1
+        "img2.jpg" -> R.drawable.img2
+        "img3.jpg" -> R.drawable.img3
+        "img4.jpg" -> R.drawable.img4
+        "img8.jpg" -> R.drawable.img8
         else -> R.drawable.img1
     }
 }

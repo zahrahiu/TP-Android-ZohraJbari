@@ -8,7 +8,9 @@
     "productPrice": "250 DH",
     "type": "HIBISCUS",
     "colors": ["RED", "PINK"],
-    "occasions": ["LOVE", "ANNIVERSARY"]
+    "occasions": ["LOVE", "ANNIVERSARY"],
+    "discountPercent": 30,
+    "offerEnd": 1753144799000
   },
   {
     "productID": "FL002",
@@ -19,7 +21,9 @@
     "productPrice": "200 DH",
     "type": "LAVENDER",
     "colors": ["PURPLE"],
-    "occasions": ["THANKS", "BIRTHDAY"]
+    "occasions": ["THANKS", "BIRTHDAY"],
+    "discountPercent": 30,
+    "offerEnd": 1753144799000
   },
   {
     "productID": "FL003",
@@ -30,7 +34,9 @@
     "productPrice": "300 DH",
     "type": "LILY",
     "colors": ["WHITE"],
-    "occasions": ["WEDDING", "ANNIVERSARY"]
+    "occasions": ["WEDDING", "ANNIVERSARY"],
+    "discountPercent": 30,
+    "offerEnd": 1753144799000
   },
   {
     "productID": "FL004",
@@ -63,7 +69,9 @@
     "productPrice": "270 DH",
     "type": "TULIP",
     "colors": ["MULTICOLOR"],
-    "occasions": ["BIRTHDAY", "THANKS"]
+    "occasions": ["BIRTHDAY", "THANKS"],
+    "discountPercent": 30,
+    "offerEnd": 1753144799000
   },
   {
     "productID": "FL007",
