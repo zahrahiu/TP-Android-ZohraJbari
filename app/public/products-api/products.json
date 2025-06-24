@@ -93,7 +93,7 @@
     "quantity": "6",
     "productPrice": "210 DH",
     "type": "DAISY",
-    "colors": "YELLOW",
+    "colors": ["YELLOW"],
     "occasions": ["APOLOGY"],
     "category": "ARRANGEMENT"
   },
