@@ -6,14 +6,11 @@ import kotlinx.coroutines.flow.StateFlow
 import com.example.myapplication.data.Entities.*
 
 class CartViewModel : ViewModel() {
-
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
     val items: StateFlow<List<CartItem>> = _items
 
-    // -------------- Public API --------------
     fun addToCart(product: Product, selected: List<Pair<Addon, Int>>): Boolean {
         val stock = product.quantity.toIntOrNull() ?: Int.MAX_VALUE
-
         val list = _items.value.toMutableList()
         val current = list.find { it.product.id == product.id }
 
@@ -73,7 +70,10 @@ class CartViewModel : ViewModel() {
         list.remove(ci)
         _items.value = list
     }
+
+    fun clearCart() {
+        _items.value = emptyList()
+    }
 }
 
-// Alias pour simplifier CheckoutScreen
 typealias CartItemUi = CartItem

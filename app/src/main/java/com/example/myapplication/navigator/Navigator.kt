@@ -1,4 +1,4 @@
-package com.example.emtyapp.nav
+package com.example.myapplication.navigator
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,15 +12,13 @@ import com.example.emtyapp.ui.product.screens.HomeScreen
 import com.example.myapplication.ui.cart.CartScreen
 import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.checkout.CheckoutScreen
+import com.example.myapplication.ui.checkout.OrderSummaryScreen
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.DetailsScreen
-import com.example.myapplication.ui.product.screens.CategoryProductsScreen
-import com.example.myapplication.ui.product.screens.CategorySelectionScreen
-import com.example.myapplication.ui.product.screens.FavoritesScreen
+import com.example.myapplication.ui.product.screens.*
+import java.net.URLEncoder
+import java.net.URLDecoder
 
-/**
- * Centralised navigation routes
- */
 object Routes {
     const val Home = "home"
     const val Favorites = "favorites"
@@ -29,16 +27,15 @@ object Routes {
     const val CategorySelection = "category_selection"
     const val CategoryProducts = "category_products"
     const val Checkout = "checkout"
+    const val OrderSummary = "order_summary/{name}/{phone}/{address}"
 }
 
 @Composable
 fun AppNavigation(viewModel: ProductViewModel) {
     val nav = rememberNavController()
-    // ✅ Single instance of the cart VM shared across all destinations
     val cartVM = remember { CartViewModel() }
 
     NavHost(navController = nav, startDestination = Routes.Home) {
-        // ---------- Home ----------
         composable(Routes.Home) {
             HomeScreen(
                 viewModel = viewModel,
@@ -50,7 +47,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        // ---------- Favorites ----------
         composable(Routes.Favorites) {
             FavoritesScreen(
                 viewModel = viewModel,
@@ -62,7 +58,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        // ---------- Product details ----------
         composable(
             route = "${Routes.ProductDetail}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.StringType })
@@ -82,7 +77,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
             } ?: Text("Produit introuvable")
         }
 
-        // ---------- Cart ----------
         composable(Routes.Cart) {
             CartScreen(
                 viewModel = cartVM,
@@ -94,7 +88,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        // ---------- Category selection ----------
         composable(Routes.CategorySelection) {
             CategorySelectionScreen(
                 onCategorySelected = { category -> nav.navigate("${Routes.CategoryProducts}/$category") },
@@ -105,7 +98,6 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        // ---------- Category products ----------
         composable(
             route = "${Routes.CategoryProducts}/{category}",
             arguments = listOf(navArgument("category") { type = NavType.StringType })
@@ -123,15 +115,53 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        // ---------- Checkout ----------
         composable(Routes.Checkout) {
-            // ✅ Pass the SAME cart view-model so we can read the cart items
             CheckoutScreen(
                 viewModel = cartVM,
                 onBack = { nav.popBackStack() },
-                onPay = {
-                    // TODO handle success (e.g. clear cart + snackbar)
+                onPay = { name, phone, address ->
+                    nav.navigate(
+                        Routes.OrderSummary
+                            .replace("{name}", URLEncoder.encode(name, "UTF-8"))
+                            .replace("{phone}", URLEncoder.encode(phone, "UTF-8"))
+                            .replace("{address}", URLEncoder.encode(address, "UTF-8"))
+                    ) {
+                        popUpTo(Routes.Home) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.OrderSummary) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name")?.let {
+                URLDecoder.decode(it, "UTF-8")
+            } ?: ""
+            val phone = backStackEntry.arguments?.getString("phone")?.let {
+                URLDecoder.decode(it, "UTF-8")
+            } ?: ""
+            val address = backStackEntry.arguments?.getString("address")?.let {
+                URLDecoder.decode(it, "UTF-8")
+            } ?: ""
+
+            val total = cartVM.items.value.sumOf { ci ->
+                val originalPrice = ci.product.price.toDoubleOrNull() ?: 0.0
+                val productPrice = if (ci.product.discountPercent != null) {
+                    originalPrice * (100 - ci.product.discountPercent) / 100
+                } else {
+                    originalPrice
+                }
+                productPrice * ci.quantity + ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
+            } + 20.0
+
+            OrderSummaryScreen(
+                userName = name,
+                phone = phone,
+                address = address,
+                items = cartVM.items.value,
+                total = total,
+                onBackHome = {
                     nav.popBackStack(Routes.Home, false)
+                    cartVM.clearCart()
                 }
             )
         }

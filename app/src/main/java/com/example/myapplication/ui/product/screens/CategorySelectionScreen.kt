@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.emtyapp.nav.Routes
+import com.example.myapplication.navigator.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

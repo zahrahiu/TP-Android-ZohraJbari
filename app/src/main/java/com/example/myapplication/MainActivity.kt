@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.emtyapp.nav.AppNavigation
 
 
 
@@ -17,7 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.emtyapp.nav.AppNavigation
+import com.example.myapplication.navigator.AppNavigation
 import com.example.myapplication.ui.product.ProductViewModel
 
 import com.example.myapplication.ui.theme.MyApplicationTheme

@@ -1,7 +1,5 @@
 package com.example.myapplication.ui.checkout
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,22 +25,20 @@ import com.example.myapplication.ui.cart.CartItemUi
 import com.example.myapplication.ui.cart.CartViewModel
 import kotlinx.coroutines.launch
 
-// Couleurs correspondant à celles de votre écran produit
-val RougeFlora = Color(0xFFDC4C3E)      // Rouge cerise
-val BeigeFlora = Color(0xFFFFF8F0)      // Beige clair (identique à celui de votre écran produit)
-val BeigeBackground = Color(0xFFFFFBF7) // Beige plus clair pour le fond
+val RougeFlora = Color(0xFFDC4C3E)
+val BeigeFlora = Color(0xFFFFF8F0)
+val BeigeBackground = Color(0xFFFFFBF7)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     viewModel: CartViewModel,
     onBack: () -> Unit,
-    onPay: () -> Unit
+    onPay: (name: String, phone: String, address: String) -> Unit
 ) {
     val items = viewModel.items.collectAsState().value
     val scope = rememberCoroutineScope()
 
-    // ---------- STATE ----------
     var selfPickup by remember { mutableStateOf(true) }
     var senderExpanded by remember { mutableStateOf(false) }
     var recipientExpanded by remember { mutableStateOf(false) }
@@ -79,8 +74,7 @@ fun CheckoutScreen(
         }
     }
 
-    // Calcul du total avec prise en compte des remises
-    val deliveryFee =  20.0
+    val deliveryFee = 20.0
     val totalWithoutDelivery = remember(items) {
         items.sumOf { ci ->
             val originalPrice = parsePrice(ci.product.price).toDouble()
@@ -107,17 +101,16 @@ fun CheckoutScreen(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeFlora)
             )
         },
-        containerColor = BeigeBackground // Utilisation du beige plus clair pour le fond
+        containerColor = BeigeBackground
     ) { pad ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(pad)
-                .background(BeigeBackground), // Fond uniforme beige clair
+                .background(BeigeBackground),
             contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // -------- Mode de réception --------
             item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -136,7 +129,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // -------- Formulaires --------
             if (selfPickup) {
                 item { SectionTitle("Vos coordonnées") }
                 item {
@@ -145,7 +137,6 @@ fun CheckoutScreen(
                     }
                 }
             } else {
-                // Expéditeur
                 item { SectionCollapsible("Expéditeur", senderExpanded) { senderExpanded = !senderExpanded } }
                 if (senderExpanded) {
                     item {
@@ -154,7 +145,6 @@ fun CheckoutScreen(
                         }
                     }
                 }
-                // Destinataire
                 item { SectionCollapsible("Destinataire", recipientExpanded) { recipientExpanded = !recipientExpanded } }
                 if (recipientExpanded) {
                     item {
@@ -163,7 +153,6 @@ fun CheckoutScreen(
                         }
                     }
                 }
-                // Commentaire
                 item {
                     OutlinedTextField(
                         value = comment,
@@ -178,7 +167,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // -------- Paiement --------
             item { SectionTitle("Méthode de paiement") }
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -207,15 +195,7 @@ fun CheckoutScreen(
                     }
                 }
             }
-            if (paymentMethod == "PayPal") {
-                item {
-                    CardFields(cardNumber, cardExpiry, cardCvv) { cn, ce, cv ->
-                        cardNumber = cn; cardExpiry = ce; cardCvv = cv
-                    }
-                }
-            }
 
-            // -------- Résumé panier --------
             item { SectionTitle("Votre commande") }
             items(items) { ci ->
                 val originalPrice = parsePrice(ci.product.price)
@@ -306,7 +286,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // -------- Total --------
             item {
                 Card(
                     modifier = Modifier
@@ -352,12 +331,13 @@ fun CheckoutScreen(
                 }
             }
 
-            // -------- Bouton payer --------
             item {
                 Button(
                     onClick = {
-                        scope.launch {
-                            onPay()
+                        if (name.isNotBlank() && phone.isNotBlank() && address.isNotBlank()) {
+                            scope.launch {
+                                onPay(name, phone, address)
+                            }
                         }
                     },
                     modifier = Modifier
@@ -375,7 +355,6 @@ fun CheckoutScreen(
     }
 }
 
-// ---------------- Helper composables ----------------
 @Composable
 private fun SectionTitle(title: String) {
     Text(title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, modifier = Modifier.padding(vertical = 8.dp))
@@ -494,23 +473,23 @@ private fun CardFields(
 }
 
 private fun getImageResource(name: String): Int = when (name) {
-    "hibiscus.jpg"        -> R.drawable.hibiscus
-    "lavender.jpg"        -> R.drawable.lavender
-    "lily.jpg"            -> R.drawable.lily
-    "pansy.jpg"           -> R.drawable.pansy
-    "img1.jpg"            -> R.drawable.img1
-    "img2.jpg"            -> R.drawable.img2
-    "img3.jpg"            -> R.drawable.img3
-    "img4.jpg"            -> R.drawable.img4
-    "img8.jpg"            -> R.drawable.img8
-    "rosebox.jpg"         -> R.drawable.rosebox
-    "tulipspanier.jpg"    -> R.drawable.tulipspanier
-    "orchidbirthday.jpg"  -> R.drawable.orchidbirthday
-    "lilygift.jpg"        -> R.drawable.lilygift
-    "pansycolor.jpg"      -> R.drawable.pansycolor
-    "pinkhibiscus.jpg"    -> R.drawable.pinkhibiscus
-    "daisyapology.jpg"    -> R.drawable.daisyapology
-    "romantictulips.jpg"  -> R.drawable.romantictulips
-    "purelily.jpg"        -> R.drawable.purelily
-    else                  -> R.drawable.img1
+    "hibiscus.jpg" -> R.drawable.hibiscus
+    "lavender.jpg" -> R.drawable.lavender
+    "lily.jpg" -> R.drawable.lily
+    "pansy.jpg" -> R.drawable.pansy
+    "img1.jpg" -> R.drawable.img1
+    "img2.jpg" -> R.drawable.img2
+    "img3.jpg" -> R.drawable.img3
+    "img4.jpg" -> R.drawable.img4
+    "img8.jpg" -> R.drawable.img8
+    "rosebox.jpg" -> R.drawable.rosebox
+    "tulipspanier.jpg" -> R.drawable.tulipspanier
+    "orchidbirthday.jpg" -> R.drawable.orchidbirthday
+    "lilygift.jpg" -> R.drawable.lilygift
+    "pansycolor.jpg" -> R.drawable.pansycolor
+    "pinkhibiscus.jpg" -> R.drawable.pinkhibiscus
+    "daisyapology.jpg" -> R.drawable.daisyapology
+    "romantictulips.jpg" -> R.drawable.romantictulips
+    "purelily.jpg" -> R.drawable.purelily
+    else -> R.drawable.img1
 }
