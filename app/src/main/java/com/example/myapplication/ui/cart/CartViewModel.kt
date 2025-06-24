@@ -10,7 +10,7 @@ class CartViewModel : ViewModel() {
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
     val items: StateFlow<List<CartItem>> = _items
 
-
+    // -------------- Public API --------------
     fun addToCart(product: Product, selected: List<Pair<Addon, Int>>): Boolean {
         val stock = product.quantity.toIntOrNull() ?: Int.MAX_VALUE
 
@@ -60,6 +60,7 @@ class CartViewModel : ViewModel() {
         aq.quantity++
         _items.value = _items.value
     }
+
     fun decAddon(ci: CartItem, aq: AddonQuantity) {
         if (aq.quantity > 1) {
             aq.quantity--
@@ -72,5 +73,7 @@ class CartViewModel : ViewModel() {
         list.remove(ci)
         _items.value = list
     }
-
 }
+
+// Alias pour simplifier CheckoutScreen
+typealias CartItemUi = CartItem

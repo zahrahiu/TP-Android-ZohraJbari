@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,8 +25,9 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import kotlinx.coroutines.launch
 
+// Couleurs mises à jour selon votre demande
 val RougeFlora = Color(0xFFDC4C3E)      // Rouge cerise
-val BeigeFlora = Color(0xFFFFF8F0)      // Beige clair
+val BeigeFlora = Color(0xFFFFFBF7)      // Beige clair (identique à BeigeBackground)
 val GrisPetitGris = Color(0xFF8E8E93)   // Gris doux
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +37,8 @@ fun CartScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToCategory: () -> Unit,
-    onNavigateToCart: () -> Unit
+    onNavigateToCart: () -> Unit,
+    onNavigateToCheckout: () -> Unit
 ) {
     val items = viewModel.items.collectAsState().value
     val snackHostState = remember { SnackbarHostState() }
@@ -66,21 +67,43 @@ fun CartScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Mon Panier", color = RougeFlora, fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeFlora)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = BeigeFlora,
+                    titleContentColor = RougeFlora
+                )
             )
         },
         bottomBar = {
             NavigationBar(containerColor = BeigeFlora) {
-                NavigationBarItem(selected = false, onClick = onNavigateToHome, icon = { Text("🏠", fontSize = 20.sp) }, label = { Text("Home") })
-                NavigationBarItem(selected = false, onClick = onNavigateToCategory, icon = { Text("🪷", fontSize = 20.sp) }, label = { Text("Catégories") })
-                NavigationBarItem(selected = false, onClick = onNavigateToFavorites, icon = { Text("❤", fontSize = 20.sp) }, label = { Text("Favoris") })
-                NavigationBarItem(selected = true, onClick = onNavigateToCart, icon = { Text("🛒", fontSize = 20.sp) }, label = { Text("Panier") })
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToHome,
+                    icon = { Text("🏠", fontSize = 20.sp) },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToCategory,
+                    icon = { Text("🪷", fontSize = 20.sp) },
+                    label = { Text("Catégories") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onNavigateToFavorites,
+                    icon = { Text("❤", fontSize = 20.sp) },
+                    label = { Text("Favoris") }
+                )
+                NavigationBarItem(
+                    selected = true,
+                    onClick = onNavigateToCart,
+                    icon = { Text("🛒", fontSize = 20.sp) },
+                    label = { Text("Panier") }
+                )
             }
         },
         snackbarHost = { SnackbarHost(snackHostState) },
         containerColor = BeigeFlora
     ) { pad ->
-
         if (items.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(pad), contentAlignment = Alignment.Center) {
                 Text("Panier vide", color = GrisPetitGris, fontWeight = FontWeight.Medium)
@@ -92,16 +115,12 @@ fun CartScreen(
             Modifier
                 .fillMaxSize()
                 .padding(pad)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            BeigeFlora,
-                            RougeFlora.copy(alpha = 0.1f)
-                        )
-                    )
-                )
+                .background(BeigeFlora)
         ) {
-            LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(8.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(8.dp)
+            ) {
                 items(items) { ci ->
                     var expanded by remember { mutableStateOf(false) }
                     val maxStock = ci.product.quantity.toIntOrNull() ?: Int.MAX_VALUE
@@ -270,7 +289,7 @@ fun CartScreen(
                     .padding(16.dp)
                     .border(
                         width = 1.dp,
-                        color = Color(0xFFFF6F00),
+                        color = RougeFlora,
                         shape = MaterialTheme.shapes.medium
                     ),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -278,8 +297,7 @@ fun CartScreen(
                 shape = MaterialTheme.shapes.medium
             ) {
                 Row(
-                    modifier = Modifier
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -287,7 +305,7 @@ fun CartScreen(
                         Text(
                             "Prix Total",
                             fontWeight = FontWeight.Normal,
-                            color = Color(0xFFFF6F00),
+                            color = RougeFlora,
                             fontSize = 16.sp
                         )
                         Text(
@@ -299,16 +317,17 @@ fun CartScreen(
                     }
 
                     Button(
-                        onClick = { /* TODO passer commande */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        onClick = { onNavigateToCheckout() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = RougeFlora,
+                            contentColor = Color.White
+                        ),
                         shape = MaterialTheme.shapes.small,
-                        border = BorderStroke(1.dp, Color.Black),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                         modifier = Modifier.padding(start = 30.dp)
                     ) {
                         Text(
                             "Passer Commande",
-                            color = Color.Black,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )
@@ -319,7 +338,6 @@ fun CartScreen(
     }
 }
 
-// Fonction pour obtenir la ressource image à partir du nom
 private fun getImageResource(name: String): Int = when (name) {
     "hibiscus.jpg"        -> R.drawable.hibiscus
     "lavender.jpg"        -> R.drawable.lavender
