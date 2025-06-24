@@ -59,7 +59,7 @@
     "type": "PANSY",
     "colors": ["MULTICOLOR"],
     "occasions": ["THANKS", "BIRTHDAY"],
-    "category": ["FLOWERS","ARRANGEMENT"]
+    "category": "FLOWERS"
   },
   {
     "productID": "FL014",
@@ -93,7 +93,7 @@
     "quantity": "6",
     "productPrice": "210 DH",
     "type": "DAISY",
-    "colors": ["YELLOW","WHITE"],
+    "colors": "YELLOW",
     "occasions": ["APOLOGY"],
     "category": "ARRANGEMENT"
   },
