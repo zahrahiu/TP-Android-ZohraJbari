@@ -56,14 +56,14 @@ fun ProductItem(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(Color.White),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             Modifier
                 .clickable(onClick = onItemClick)
-                .padding(8.dp)
+                .padding(5.dp)
         ) {
 
             Box(
@@ -77,7 +77,7 @@ fun ProductItem(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(10.dp))
                 )
 
                 /* % badge */
@@ -119,7 +119,7 @@ fun ProductItem(
                         .padding(top = 6.dp)
                         .background(Color.White, RoundedCornerShape(8.dp))
                         .border(1.dp, Color(0xFFDC143C), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -137,10 +137,10 @@ fun ProductItem(
             /* ======== Title ======== */
             Text(
                 product.name,
-                fontSize = 16.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF5D4037),
-                modifier = Modifier.padding(top = 6.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
 
             /* ======== Price ======== */
@@ -151,14 +151,14 @@ fun ProductItem(
                 ) {
                     Text(
                         "%.0f DH".format(oldPrice),
-                        fontSize = 13.sp,
+                        fontSize = 10.sp,
                         color = Color(0xFF8D6E63),
                         textDecoration = TextDecoration.LineThrough
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "%.0f DH".format(newPrice),
-                        fontSize = 15.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFDC143C)
                     )
@@ -166,7 +166,7 @@ fun ProductItem(
             } else {
                 Text(
                     product.price,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = Color(0xFF8D6E63),
                     modifier = Modifier.padding(top = 2.dp)
                 )
@@ -177,8 +177,13 @@ fun ProductItem(
                 RatingBar(
                     rating = product.rating,
                     onRate = onRateProduct,
-                    modifier = Modifier.padding(top = 6.dp)
+                    starSize = 15.dp,
+                    spaceBetween = 2.dp,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .height(18.dp)
                 )
+
             }
         }
     }

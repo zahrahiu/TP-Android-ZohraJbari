@@ -12,7 +12,7 @@ import com.example.myapplication.data.Entities.Product
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProductsList( // ← هنا زيدي s
+fun ProductsList(
     products: List<Product>,
     favoriteProductIds: Set<String>,
     onNavigateToDetails: (String) -> Unit,
