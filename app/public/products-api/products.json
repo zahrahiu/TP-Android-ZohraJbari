@@ -35,7 +35,7 @@
     "type": "ORCHID",
     "colors": ["PURPLE"],
     "occasions": ["BIRTHDAY"],
-    "category": "EN_POT"
+    "category": "POTTED"
   },
   {
     "productID": "FL012",
@@ -119,6 +119,6 @@
     "type": "LILY",
     "colors": ["WHITE"],
     "occasions": ["WEDDING"],
-    "category": "EN_POT"
+    "category": "POTTED"
   }
 ]

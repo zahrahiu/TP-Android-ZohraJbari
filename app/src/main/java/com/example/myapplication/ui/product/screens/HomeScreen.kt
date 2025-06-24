@@ -81,7 +81,7 @@ fun HomeScreen(
     }
 
     val quickFilteredProducts = when (selectedQuickFilter) {
-        QuickFilter.GIFT -> filtered.filter { "GIFT" in it.occasions }
+        QuickFilter.GIFT -> filtered.filter { it.category.equals("GIFT", ignoreCase = true) }
         QuickFilter.MULTICOLOR -> filtered.filter { "MULTICOLOR" in it.colors }
         QuickFilter.BASKET -> filtered.filter {
             it.description.contains("panier", ignoreCase = true) ||

@@ -185,14 +185,27 @@ fun ProductItem(
 }
 
 private fun getImageResource(name: String): Int = when (name) {
-    "hibiscus.jpg" -> R.drawable.hibiscus
-    "lavender.jpg" -> R.drawable.lavender
-    "lily.jpg"     -> R.drawable.lily
-    "pansy.jpg"    -> R.drawable.pansy
-    "img1.jpg"     -> R.drawable.img1
-    "img2.jpg"     -> R.drawable.img2
-    "img3.jpg"     -> R.drawable.img3
-    "img4.jpg"     -> R.drawable.img4
-    "img8.jpg"     -> R.drawable.img8
-    else           -> R.drawable.img1
+    "hibiscus.jpg"        -> R.drawable.hibiscus
+    "lavender.jpg"        -> R.drawable.lavender
+    "lily.jpg"            -> R.drawable.lily
+    "pansy.jpg"           -> R.drawable.pansy
+    "img1.jpg"            -> R.drawable.img1
+    "img2.jpg"            -> R.drawable.img2
+    "img3.jpg"            -> R.drawable.img3
+    "img4.jpg"            -> R.drawable.img4
+    "img8.jpg"            -> R.drawable.img8
+
+    // 🔻 Nouveaux produits
+    "rosebox.jpg"         -> R.drawable.rosebox
+    "tulipspanier.jpg"    -> R.drawable.tulipspanier
+    "orchidbirthday.jpg"  -> R.drawable.orchidbirthday
+    "lilygift.jpg"        -> R.drawable.lilygift
+    "pansycolor.jpg"      -> R.drawable.pansycolor
+    "pinkhibiscus.jpg"    -> R.drawable.pinkhibiscus
+    "daisyapology.jpg"    -> R.drawable.daisyapology
+    "romantictulips.jpg"  -> R.drawable.romantictulips
+    "purelily.jpg"        -> R.drawable.purelily
+
+    else                  -> R.drawable.img1 // fallback
 }
+
