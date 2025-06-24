@@ -85,8 +85,7 @@ fun HomeScreen(
         QuickFilter.MULTICOLOR -> filtered.filter { "MULTICOLOR" in it.colors }
         QuickFilter.BASKET -> filtered.filter {
             it.description.contains("panier", ignoreCase = true) ||
-                    it.description.contains("arrangement", ignoreCase = true) ||
-                    it.description.contains("chbka", ignoreCase = true)
+                    it.description.contains("arrangement", ignoreCase = true)
         }
         null -> filtered
     }
