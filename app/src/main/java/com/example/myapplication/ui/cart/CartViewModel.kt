@@ -66,4 +66,11 @@ class CartViewModel : ViewModel() {
             _items.value = _items.value
         }
     }
+
+    fun removeProduct(ci: CartItem) {
+        val list = _items.value.toMutableList()
+        list.remove(ci)
+        _items.value = list
+    }
+
 }
