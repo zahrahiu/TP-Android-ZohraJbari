@@ -1,37 +1,23 @@
 package com.example.myapplication.ui.product.component
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.*
+import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Addon
@@ -44,8 +30,8 @@ import java.util.concurrent.TimeUnit
 val RougeCerise = Color(0xFFDC4C3E)
 val CremeClair = Color(0xFFFFF8F0)
 val GrisPetitGris = Color(0xFF8E8E93)
-val VertAccent = Color(0xFF4CAF50)  // couleur verte douce pour le prix nouveau
-val GrisClair = Color(0xFFF5F5F5)  // fond clair pour sections
+val VertAccent = Color(0xFF4CAF50)
+val GrisClair = Color(0xFFF5F5F5)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -56,8 +42,28 @@ fun DetailsScreen(
     onAddToCart: (List<Pair<Addon, Int>>) -> Boolean = { true }
 ) {
     val imageRes = when (product.image) {
-        "hibiscus.jpg" -> R.drawable.hibiscus
-        else -> R.drawable.img1
+        "hibiscus.jpg"        -> R.drawable.hibiscus
+        "lavender.jpg"        -> R.drawable.lavender
+        "lily.jpg"            -> R.drawable.lily
+        "pansy.jpg"           -> R.drawable.pansy
+        "img1.jpg"            -> R.drawable.img1
+        "img2.jpg"            -> R.drawable.img2
+        "img3.jpg"            -> R.drawable.img3
+        "img4.jpg"            -> R.drawable.img4
+        "img8.jpg"            -> R.drawable.img8
+
+        // 🔻 Nouveaux produits
+        "rosebox.jpg"         -> R.drawable.rosebox
+        "tulipspanier.jpg"    -> R.drawable.tulipspanier
+        "orchidbirthday.jpg"  -> R.drawable.orchidbirthday
+        "lilygift.jpg"        -> R.drawable.lilygift
+        "pansycolor.jpg"      -> R.drawable.pansycolor
+        "pinkhibiscus.jpg"    -> R.drawable.pinkhibiscus
+        "daisyapology.jpg"    -> R.drawable.daisyapology
+        "romantictulips.jpg"  -> R.drawable.romantictulips
+        "purelily.jpg"        -> R.drawable.purelily
+
+        else                  -> R.drawable.img1
     }
     var showSheet by remember { mutableStateOf(false) }
     val snackHost = remember { SnackbarHostState() }
@@ -66,9 +72,7 @@ fun DetailsScreen(
     val oldPrice = product.price.replace(Regex("[^0-9.]"), "").toFloatOrNull() ?: 0f
     val newPrice = product.discountPercent?.let { oldPrice * (100 - it) / 100 }
 
-    // État mis à jour chaque seconde pour countdown live
     var remainingMillis by remember { mutableStateOf(0L) }
-
     LaunchedEffect(product.offerEndEpochMillis) {
         while (true) {
             val now = System.currentTimeMillis()
@@ -111,7 +115,7 @@ fun DetailsScreen(
                 product.name,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = RougeCerise,
+                color = Color.Black,
                 modifier = Modifier.padding(start = 17.dp, top = 10.dp, bottom = 12.dp)
             )
 
@@ -133,19 +137,17 @@ fun DetailsScreen(
                         contentScale = ContentScale.Crop
                     )
 
-                    // Discount badge
                     if (product.discountPercent != null) {
                         Box(
                             modifier = Modifier
                                 .padding(8.dp)
-                                .background(RougeCerise, RoundedCornerShape(10.dp))
+                                .background(Color(0xFFDC143C), RoundedCornerShape(10.dp))
                                 .padding(horizontal = 12.dp, vertical = 4.dp)
                         ) {
                             Text("-${product.discountPercent}%", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    // Countdown timer sous l'image avec border rouge
                     if (product.discountPercent != null && remainingMillis > 0) {
                         Box(
                             modifier = Modifier
@@ -177,62 +179,68 @@ fun DetailsScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(16.dp))
                         .background(GrisClair)
-                        .padding(16.dp),
+                        .padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    if (newPrice != null) {
-                        Text(
-                            text = "${oldPrice.toInt()} DH",
-                            textDecoration = TextDecoration.LineThrough,
-                            color = GrisPetitGris,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "${newPrice.toInt()} DH",
-                            color = VertAccent,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        )
-                    } else {
-                        Text(
-                            text = "${oldPrice.toInt()} DH",
-                            color = RougeCerise,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        )
-                    }
-
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (newPrice != null) {
+                                Text(
+                                    text = "${oldPrice.toInt()} DH",
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = GrisPetitGris,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(end = 6.dp)
+                                )
+                                Text(
+                                    text = "${newPrice.toInt()} DH",
+                                    color = VertAccent,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            } else {
+                                Text(
+                                    text = "${oldPrice.toInt()} DH",
+                                    color = VertAccent,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+
+
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            "Quantité",
-                            color = RougeCerise,
+                            "Quantité : ",
+                            color = Color.Black,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp
+                            fontSize = 14.sp
                         )
                         Text(
                             product.quantity,
                             color = Color.Black,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(RougeCerise.copy(alpha = 0.15f))
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                            fontSize = 14.sp
                         )
                     }
+
+                    ProductRatingSection(product = product, onRate = {
+                        viewModel.updateProductRating(product.id, it)
+                    })
                 }
             }
 
             Spacer(Modifier.height(20.dp))
-
-            ProductRatingSection(product = product, onRate = {
-                viewModel.updateProductRating(product.id, it)
-            })
 
             Column(Modifier.padding(horizontal = 20.dp)) {
                 ExpandableSection("📜 Description", titleColor = GrisPetitGris, contentColor = Color.Black) {
@@ -294,6 +302,7 @@ fun DetailsScreen(
         if (!ok) scope.launch { snackHost.showSnackbar("Stock insuffisant") } else showSheet = false
     }
 }
+
 @Composable
 fun ExpandableSection(
     title: String,
@@ -334,8 +343,6 @@ fun ExpandableSection(
         }
     }
 }
-
-
 
 @Composable
 fun DetailRow(label: String, value: String, textColor: Color, accentColor: Color) {
