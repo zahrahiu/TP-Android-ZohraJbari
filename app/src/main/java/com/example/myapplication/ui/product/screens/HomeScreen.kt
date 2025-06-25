@@ -3,16 +3,15 @@ package com.example.emtyapp.ui.product.screens
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -26,7 +25,8 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
 import com.example.myapplication.ui.product.component.QuickFilter
-import com.example.myapplication.ui.product.component.QuickFilterImage
+import com.example.myapplication.ui.theme.LocalThemeState
+import com.example.myapplication.ui.theme.Mode
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -38,6 +38,10 @@ fun HomeScreen(
     onNavigateToCategory: () -> Unit,
     currentRoute: String = Routes.Home
 ) {
+    val themeState = LocalThemeState.current
+
+    var showMenu by remember { mutableStateOf(false) }
+
     val state by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
 
@@ -93,13 +97,60 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🌸 Flora Boutique", color = Color(0xFFDC4C3E), fontWeight = FontWeight.Black) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF8F0))
+                title = {
+                    Text(
+                        "🌸 Flora Boutique",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Black
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
+                actions = {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Changer la langue") },
+                            onClick = {
+                                // TODO: implement language change
+                                showMenu = false
+                            }
+                        )
+                        Divider()
+                        DropdownMenuItem(
+                            text = { Text("Mode Clair") },
+                            onClick = {
+                                themeState.mode = Mode.CLAIR
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Mode Sombre") },
+                            onClick = {
+                                themeState.mode = Mode.SOMBRE
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Mode Pastel") },
+                            onClick = {
+                                themeState.mode = Mode.PASTEL
+                                showMenu = false
+                            }
+                        )
+                    }
+                }
             )
         },
-        containerColor = Color(0xFFFFFBF7),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFFFFF8F0)) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
                     onClick = {},
@@ -139,7 +190,8 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = searchQuery, onValueChange = { searchQuery = it },
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     placeholder = { Text("🔍 Rechercher...") },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     modifier = Modifier.weight(1f),
@@ -155,12 +207,15 @@ fun HomeScreen(
                     onClick = { showFilters = !showFilters },
                     label = { Text("Filtres") },
                     leadingIcon = {
-                        Icon(Icons.Default.ArrowDropDown, null,
-                            Modifier.rotate(if (showFilters) 180f else 0f))
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            null,
+                            Modifier.rotate(if (showFilters) 180f else 0f)
+                        )
                     },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
-                        selectedLabelColor = Color(0xFFDC4C3E)
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
@@ -173,8 +228,9 @@ fun HomeScreen(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 Column(
-                    Modifier.fillMaxWidth()
-                        .background(Color.White, RoundedCornerShape(12.dp))
+                    Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
                         .padding(16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
@@ -187,8 +243,8 @@ fun HomeScreen(
                                 onClick = { tab = if (tab == t) null else t },
                                 label = { Text(t) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
-                                    selectedLabelColor = Color(0xFFDC4C3E)
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
@@ -204,8 +260,8 @@ fun HomeScreen(
                                     onClick = { tType = if (tType == t) null else t },
                                     label = { Text(t) },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
-                                        selectedLabelColor = Color(0xFFDC4C3E)
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        selectedLabelColor = MaterialTheme.colorScheme.primary
                                     )
                                 )
                             }
@@ -219,8 +275,8 @@ fun HomeScreen(
                                     },
                                     label = { Text(c) },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
-                                        selectedLabelColor = Color(0xFFDC4C3E)
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        selectedLabelColor = MaterialTheme.colorScheme.primary
                                     )
                                 )
                             }
@@ -232,15 +288,16 @@ fun HomeScreen(
                                     onClick = { tOccasion = if (tOccasion == o) null else o },
                                     label = { Text(o) },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color(0xFFDC4C3E).copy(alpha = 0.2f),
-                                        selectedLabelColor = Color(0xFFDC4C3E)
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        selectedLabelColor = MaterialTheme.colorScheme.primary
                                     )
                                 )
                             }
                         }
                         null -> Text(
                             "Sélectionnez un filtre pour afficher les options",
-                            color = Color.Gray, modifier = Modifier.padding(vertical = 12.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 12.dp)
                         )
                     }
 
@@ -248,14 +305,18 @@ fun HomeScreen(
 
                     Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
-                            value = pMin, singleLine = true,
+                            value = pMin,
+                            singleLine = true,
                             onValueChange = { pMin = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                            label = { Text("Prix Min") }, modifier = Modifier.weight(1f)
+                            label = { Text("Prix Min") },
+                            modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
-                            value = pMax, singleLine = true,
+                            value = pMax,
+                            singleLine = true,
                             onValueChange = { pMax = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                            label = { Text("Prix Max") }, modifier = Modifier.weight(1f)
+                            label = { Text("Prix Max") },
+                            modifier = Modifier.weight(1f)
                         )
                     }
 
@@ -263,20 +324,29 @@ fun HomeScreen(
 
                     Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(16.dp)) {
                         TextButton(onClick = {
-                            tType = null; tOccasion = null; tColors = emptySet()
-                            pMin = ""; pMax = ""
-                        }) { Text("Réinitialiser", color = Color(0xFFDC4C3E)) }
+                            tType = null
+                            tOccasion = null
+                            tColors = emptySet()
+                            pMin = ""
+                            pMax = ""
+                        }) {
+                            Text("Réinitialiser", color = MaterialTheme.colorScheme.primary)
+                        }
 
                         Button(onClick = {
-                            aType = tType; aOccasion = tOccasion; aColors = tColors
-                            aPriceRange = parsePrice(pMin, pMax); showFilters = false
-                        }) { Text("Appliquer") }
+                            aType = tType
+                            aOccasion = tOccasion
+                            aColors = tColors
+                            aPriceRange = parsePrice(pMin, pMax)
+                            showFilters = false
+                        }) {
+                            Text("Appliquer")
+                        }
                     }
                 }
             }
 
             Spacer(Modifier.height(8.dp))
-
 
             Box(
                 modifier = Modifier
@@ -288,7 +358,7 @@ fun HomeScreen(
                     text = "\uD83D\uDC90 Trouve ta fleur préférée \uD83D\uDC90",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFDC4C3E)
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -296,9 +366,15 @@ fun HomeScreen(
 
             Box(Modifier.weight(1f)) {
                 when {
-                    state.isLoading -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
-                    state.error != null -> Center { Text("Erreur: ${state.error}", color = Color.Red) }
-                    quickFilteredProducts.isEmpty() -> Center { Text("Aucun produit trouvé") }
+                    state.isLoading -> Center {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                    state.error != null -> Center {
+                        Text("Erreur: ${state.error}", color = Color.Red)
+                    }
+                    quickFilteredProducts.isEmpty() -> Center {
+                        Text("Aucun produit trouvé")
+                    }
                     else -> ProductsList(
                         products = quickFilteredProducts,
                         favoriteProductIds = favoriteIds,
@@ -308,7 +384,6 @@ fun HomeScreen(
                         selectedQuickFilter = selectedQuickFilter,
                         onQuickFilterSelected = { selectedQuickFilter = it }
                     )
-
                 }
             }
         }
