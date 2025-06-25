@@ -1,4 +1,3 @@
-// ui/product/component/ProductItem.kt
 package com.example.myapplication.ui.product.component
 
 import androidx.compose.foundation.Image
@@ -38,21 +37,17 @@ fun ProductItem(
     modifier: Modifier = Modifier,
     showRating: Boolean = true
 ) {
-    /* ---------- Resources ---------- */
     val imgRes = getImageResource(product.image)
 
-    /* ---------- Prices ---------- */
     fun parsePrice(s: String) = s.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
     val oldPrice = parsePrice(product.price)
     val newPrice = product.discountPercent?.let { oldPrice * (100 - it) / 100f }
 
-    /* ---------- Offer date ---------- */
     val promoDate = product.offerEndEpochMillis?.let {
         Instant.ofEpochMilli(it)
             .atZone(ZoneId.systemDefault())
             .format(DateTimeFormatter.ofPattern("dd MMM yyyy • HH:mm"))
     }
-
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -65,7 +60,6 @@ fun ProductItem(
                 .clickable(onClick = onItemClick)
                 .padding(5.dp)
         ) {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,7 +74,6 @@ fun ProductItem(
                         .clip(RoundedCornerShape(10.dp))
                 )
 
-                /* % badge */
                 product.discountPercent?.let {
                     Box(
                         Modifier
@@ -93,7 +86,6 @@ fun ProductItem(
                     }
                 }
 
-                /* favorite */
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier
@@ -112,7 +104,6 @@ fun ProductItem(
                 }
             }
 
-            /* ======== Timer (date only) ======== */
             promoDate?.let {
                 Box(
                     modifier = Modifier
@@ -134,7 +125,6 @@ fun ProductItem(
                 }
             }
 
-            /* ======== Title ======== */
             Text(
                 product.name,
                 fontSize = 13.sp,
@@ -143,7 +133,6 @@ fun ProductItem(
                 modifier = Modifier.padding(top = 2.dp)
             )
 
-            /* ======== Price ======== */
             if (newPrice != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -172,7 +161,6 @@ fun ProductItem(
                 )
             }
 
-            /* ======== Rating ======== */
             if (showRating) {
                 RatingBar(
                     rating = product.rating,
@@ -183,7 +171,6 @@ fun ProductItem(
                         .padding(top = 4.dp)
                         .height(18.dp)
                 )
-
             }
         }
     }
@@ -199,8 +186,6 @@ private fun getImageResource(name: String): Int = when (name) {
     "img3.jpg"            -> R.drawable.img3
     "img4.jpg"            -> R.drawable.img4
     "img8.jpg"            -> R.drawable.img8
-
-    // 🔻 Nouveaux produits
     "rosebox.jpg"         -> R.drawable.rosebox
     "tulipspanier.jpg"    -> R.drawable.tulipspanier
     "orchidbirthday.jpg"  -> R.drawable.orchidbirthday
@@ -210,7 +195,5 @@ private fun getImageResource(name: String): Int = when (name) {
     "daisyapology.jpg"    -> R.drawable.daisyapology
     "romantictulips.jpg"  -> R.drawable.romantictulips
     "purelily.jpg"        -> R.drawable.purelily
-
-    else                  -> R.drawable.img1 // fallback
+    else                  -> R.drawable.img1
 }
-

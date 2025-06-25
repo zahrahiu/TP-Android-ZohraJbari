@@ -39,7 +39,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
     val nav = rememberNavController()
     val cartVM = remember { CartViewModel() }
 
-    NavHost(navController = nav, startDestination = Routes.Login) {
+    NavHost(navController = nav, startDestination = Routes.Home) {
 
         composable(Routes.Login) {
             LoginScreen(

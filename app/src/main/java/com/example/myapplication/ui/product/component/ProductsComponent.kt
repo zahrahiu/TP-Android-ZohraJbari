@@ -1,42 +1,74 @@
 package com.example.myapplication.ui.product.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.Entities.Product
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProductsList(
     products: List<Product>,
     favoriteProductIds: Set<String>,
+    selectedQuickFilter: QuickFilter?,
+    onQuickFilterSelected: (QuickFilter?) -> Unit,
     onNavigateToDetails: (String) -> Unit,
     onToggleFavorite: (Product) -> Unit,
-    onRateProduct: (String, Int) -> Unit
-)  {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        contentPadding = PaddingValues(8.dp),
+    onRateProduct: (String, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val rows = products.chunked(2)
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        userScrollEnabled = true
+        contentPadding = PaddingValues(bottom = 12.dp)
     ) {
-        items(products) { product ->
-            ProductItem(
-                product = product,
-                isFavorite = favoriteProductIds.contains(product.id),
-                onItemClick = { onNavigateToDetails(product.id) },
-                onFavoriteClick = { onToggleFavorite(product) },
-                onRateProduct = { rating -> onRateProduct(product.id, rating) }
-            )
+
+        item {
+            LazyRow(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(QuickFilter.values().toList(), key = { it.name }) { filter ->
+                    QuickFilterImage(
+                        filter      = filter,
+                        isSelected  = selectedQuickFilter == filter,
+                        onClick     = {
+                            onQuickFilterSelected(
+                                if (selectedQuickFilter == filter) null else filter
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
+        items(rows) { row ->
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                row.forEach { product ->
+                    ProductItem(
+                        product          = product,
+                        isFavorite       = product.id in favoriteProductIds,
+                        onItemClick      = { onNavigateToDetails(product.id) },
+                        onFavoriteClick  = { onToggleFavorite(product) },
+                        onRateProduct    = { rating -> onRateProduct(product.id, rating) },
+                        modifier         = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
+                    )
+                }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
         }
     }
 }

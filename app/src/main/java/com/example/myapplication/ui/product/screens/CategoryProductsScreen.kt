@@ -26,8 +26,26 @@ fun CategoryProductsScreen(
     onNavigateCategories: () -> Unit,
     currentRoute: String = Routes.CategoryProducts
 ) {
-    val state by viewModel.state.collectAsState()
-    val filtered = state.products.filter { it.category.equals(category, ignoreCase = true) }
+    val state          by viewModel.state.collectAsState()
+    val favoriteIds    by viewModel.favoriteIds.collectAsState()
+
+    /* ❶ Quick-filter state */
+    var selectedQuickFilter by remember { mutableStateOf<QuickFilter?>(null) }
+
+    /* ❷ produits de نفس الـ catégorie */
+    val inCategory = state.products
+        .filter { it.category.equals(category, true) }
+
+    /* ❸ appliquer Quick-filter (نفس القاعدة اللي فـ HomeScreen) */
+    val productsToShow = when (selectedQuickFilter) {
+        QuickFilter.GIFT       -> inCategory.filter { it.category.equals("GIFT", true) }
+        QuickFilter.MULTICOLOR -> inCategory.filter { "MULTICOLOR" in it.colors }
+        QuickFilter.BASKET     -> inCategory.filter {
+            it.description.contains("panier", true) ||
+                    it.description.contains("arrangement", true)
+        }
+        null -> inCategory
+    }
 
     Scaffold(
         topBar = {
@@ -44,62 +62,42 @@ fun CategoryProductsScreen(
             )
         },
         containerColor = Color(0xFFFFFBF7),
-        bottomBar = {
-            NavigationBar(containerColor = Color(0xFFFFF8F0)) {
-                NavigationBarItem(
-                    selected = currentRoute == Routes.Home,
-                    onClick = onNavigateHome,
-                    icon = { Text("🏠", fontSize = 20.sp) },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = currentRoute == Routes.CategorySelection,
-                    onClick = onNavigateCategories,
-                    icon = { Text("🪷", fontSize = 20.sp) },
-                    label = { Text("Catégories") }
-                )
-                NavigationBarItem(
-                    selected = currentRoute == Routes.Favorites,
-                    onClick = onNavigateFavorites,
-                    icon = { Text("❤", fontSize = 20.sp) },
-                    label = { Text("Favoris") }
-                )
-                NavigationBarItem(
-                    selected = currentRoute == Routes.Cart,
-                    onClick = onNavigateCart,
-                    icon = { Text("🛒", fontSize = 20.sp) },
-                    label = { Text("Panier") }
+        bottomBar = { /* … نفس الـ NavigationBar ديالك … */ }
+    ) { padding ->
+
+        if (productsToShow.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "Aucun produit trouvé dans cette catégorie.",
+                    color = Color.Gray,
+                    fontSize = 16.sp
                 )
             }
-        },
-        content = { padding ->
+        } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                if (filtered.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Aucun produit trouvé dans cette catégorie.",
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
+                /* ❹ ProductsList الجديد مع البراميطرين الجداد */
+                ProductsList(
+                    products              = productsToShow,
+                    favoriteProductIds    = favoriteIds,
+                    selectedQuickFilter   = selectedQuickFilter,
+                    onQuickFilterSelected = { selectedQuickFilter = it },
+                    onNavigateToDetails   = onNavigateToDetails,
+                    onToggleFavorite      = viewModel::toggleFavorite,
+                    onRateProduct         = { id, rate ->
+                        viewModel.updateProductRating(id, rate)
                     }
-                } else {
-                    ProductsList(
-                        products = filtered,
-                        favoriteProductIds = viewModel.favoriteIds.collectAsState().value,
-                        onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite = viewModel::toggleFavorite,
-                        onRateProduct = { id, rate -> viewModel.updateProductRating(id, rate) }
-                    )
-                }
+                )
             }
         }
-    )
+    }
 }

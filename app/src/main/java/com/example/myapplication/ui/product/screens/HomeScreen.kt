@@ -133,7 +133,6 @@ fun HomeScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Barre recherche + bouton filtres
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -168,7 +167,6 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // Zone filtres animés
             AnimatedVisibility(
                 visible = showFilters,
                 enter = fadeIn() + expandVertically(),
@@ -279,26 +277,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // Quick filter (LazyRow horizontal)
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
-                items(QuickFilter.values()) { filter ->
-                    QuickFilterImage(
-                        filter = filter,
-                        isSelected = selectedQuickFilter == filter,
-                        onClick = {
-                            selectedQuickFilter = if (selectedQuickFilter == filter) null else filter
-                        }
-                    )
-                }
-            }
 
-            // Texte "Trouve ta fleur préférée"
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -315,7 +294,6 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // Container avec poids 1 pour forcer hauteur et éviter conflit scroll
             Box(Modifier.weight(1f)) {
                 when {
                     state.isLoading -> Center { CircularProgressIndicator(color = Color(0xFFDC4C3E)) }
@@ -326,8 +304,11 @@ fun HomeScreen(
                         favoriteProductIds = favoriteIds,
                         onNavigateToDetails = onNavigateToDetails,
                         onToggleFavorite = viewModel::toggleFavorite,
-                        onRateProduct = { productId, newRating -> viewModel.updateProductRating(productId, newRating) }
+                        onRateProduct = { id, rating -> viewModel.updateProductRating(id, rating) },
+                        selectedQuickFilter = selectedQuickFilter,
+                        onQuickFilterSelected = { selectedQuickFilter = it }
                     )
+
                 }
             }
         }
