@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.emtyapp.ui.product.screens.HomeScreen
+import com.example.myapplication.ui.User.LoginScreen
+import com.example.myapplication.ui.User.RegisterScreen
 import com.example.myapplication.ui.cart.CartScreen
 import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.checkout.CheckoutScreen
@@ -20,6 +22,8 @@ import java.net.URLEncoder
 import java.net.URLDecoder
 
 object Routes {
+    const val Login = "login"
+    const val Register = "register"
     const val Home = "home"
     const val Favorites = "favorites"
     const val ProductDetail = "details"
@@ -35,7 +39,23 @@ fun AppNavigation(viewModel: ProductViewModel) {
     val nav = rememberNavController()
     val cartVM = remember { CartViewModel() }
 
-    NavHost(navController = nav, startDestination = Routes.Home) {
+    NavHost(navController = nav, startDestination = Routes.Login) {
+
+        composable(Routes.Login) {
+            LoginScreen(
+                onLoginSuccess = { nav.navigate(Routes.Home) { popUpTo(Routes.Login) { inclusive = true } } },
+                onNavigateToRegister = { nav.navigate(Routes.Register) }
+            )
+        }
+
+        composable(Routes.Register) {
+            RegisterScreen(
+                onRegisterSuccess = { nav.popBackStack() }, // retourne à login après inscription réussie
+                onNavigateToLogin = { nav.popBackStack() }
+            )
+        }
+
+
         composable(Routes.Home) {
             HomeScreen(
                 viewModel = viewModel,
@@ -158,7 +178,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 phone = phone,
                 address = address,
                 items = cartVM.items.value,
-                total = total,
+
                 onBackHome = {
                     nav.popBackStack(Routes.Home, false)
                     cartVM.clearCart()
