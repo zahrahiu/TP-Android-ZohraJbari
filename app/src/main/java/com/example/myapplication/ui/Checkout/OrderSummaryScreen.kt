@@ -13,165 +13,123 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.ui.cart.CartItemUi
+import com.example.myapplication.ui.product.screens.LanguageManager
 import kotlinx.coroutines.delay
 
-// ---------------------------- Couleurs du thème ----------------------------
-val PrimaryColor = Color(0xFFDC4C3E)   // Rouge Flora
-val SecondaryColor = Color(0xFFFFF8F0) // Beige Flora
-val BackgroundColor = Color(0xFFFFFBF7) // Beige clair
-
-// -------------------------- Constantes -------------------------
-private val StepOuterSize = 80.dp   // Taille du cercle extérieur
-private val StepInnerIconSize = 48.dp // Taille de l'icône à l'intérieur
-private const val DELIVERY_FEE = 20.0 // Frais de livraison fixes
+private const val DELIVERY_FEE = 20.0
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSummaryScreen(
+    lang: LanguageManager.Instance,
     userName: String,
     phone: String,
     address: String,
     items: List<CartItemUi>,
     onBackHome: () -> Unit
 ) {
-    // Calcul du total avec frais de livraison
+    val colors = MaterialTheme.colorScheme
     val (subtotal, totalAmount) = remember(items) {
         val st = computeSubtotal(items)
-        Pair(st, st + DELIVERY_FEE)
+        st to st + DELIVERY_FEE
     }
 
-    // Animation des étapes de commande
     var currentStep by remember { mutableStateOf(0) }
-
     LaunchedEffect(Unit) {
-        delay(2_000); currentStep = 1
-        delay(2_000); currentStep = 2
+        delay(2000); currentStep = 1
+        delay(2000); currentStep = 2
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Récapitulatif de commande", color = Color.Black) },
+                title = { Text(lang.get("order_summary_title")) },
                 navigationIcon = {
                     IconButton(onClick = onBackHome) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Retour",
-                            tint = Color.Black
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SecondaryColor)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.surface)
             )
         },
-        containerColor = BackgroundColor
+        containerColor = colors.background
     ) { padding ->
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            // En-tête
             Text(
-                "Merci pour votre commande, $userName !",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = PrimaryColor
+                text = lang.get("thank_you_order").format(userName),
+                color = colors.primary,
+                fontSize = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Section informations client
-            ClientInfoSection(phone, address)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Suivi de commande
-            OrderTrackingSection(currentStep)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Détails de la commande
-            OrderDetailsSection(items)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Total avec décomposition
-            TotalSection(subtotal, totalAmount)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-
-
+            Spacer(Modifier.height(16.dp))
+            ClientInfoSection(lang, phone, address)
+            Spacer(Modifier.height(24.dp))
+            OrderTrackingSection(lang, currentStep)
+            Spacer(Modifier.height(24.dp))
+            OrderDetailsSection(lang, items)
+            Spacer(Modifier.height(16.dp))
+            TotalSection(lang, subtotal, totalAmount)
         }
     }
 }
 
 @Composable
-private fun ClientInfoSection(phone: String, address: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SecondaryColor)
-    ) {
+private fun ClientInfoSection(lang: LanguageManager.Instance, phone: String, address: String) {
+    Card {
         Column(Modifier.padding(16.dp)) {
-            Text("Informations client", fontWeight = FontWeight.SemiBold)
+            Text(lang.get("client_info"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
-            Text("📞 $phone", fontSize = 16.sp)
-            Text("📍 $address", fontSize = 16.sp)
+            Text("📞 ${lang.get("phone")}: $phone")
+            Text("📍 ${lang.get("address")}: $address")
         }
     }
 }
 
 @Composable
-private fun OrderTrackingSection(currentStep: Int) {
+private fun OrderTrackingSection(lang: LanguageManager.Instance, currentStep: Int) {
+    val colors = MaterialTheme.colorScheme
     Column {
-        Text("Statut de votre commande:", fontWeight = FontWeight.SemiBold)
+        Text(lang.get("order_status"), style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.height(8.dp))
-
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxWidth(),
+            Arrangement.SpaceEvenly,
+            Alignment.CenterVertically
         ) {
-            StepIndicator(R.drawable.inprogress, "Commandé", currentStep >= 0)
-            Icon(Icons.Default.KeyboardArrowRight, null, tint = PrimaryColor)
-            StepIndicator(R.drawable.shipped, "Expédié", currentStep >= 1)
-            Icon(Icons.Default.KeyboardArrowRight, null, tint = PrimaryColor)
-            StepIndicator(R.drawable.delivered, "Livré", currentStep >= 2)
+            StepIndicator(R.drawable.inprogress, lang.get("ordered"), currentStep >= 0)
+            Icon(Icons.Default.KeyboardArrowRight, null, tint = colors.primary)
+            StepIndicator(R.drawable.shipped, lang.get("shipped"), currentStep >= 1)
+            Icon(Icons.Default.KeyboardArrowRight, null, tint = colors.primary)
+            StepIndicator(R.drawable.delivered, lang.get("delivered"), currentStep >= 2)
         }
-
         if (currentStep == 2) {
             Spacer(Modifier.height(16.dp))
-            Text(
-                "✅ Votre commande a été livrée avec succès !",
-                color = PrimaryColor,
-                fontWeight = FontWeight.Bold
-            )
+            Text(lang.get("order_delivered_success"), color = colors.primary)
         }
     }
 }
 
 @Composable
-private fun OrderDetailsSection(items: List<CartItemUi>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SecondaryColor)
-    ) {
+private fun OrderDetailsSection(lang: LanguageManager.Instance, items: List<CartItemUi>) {
+    val colors = MaterialTheme.colorScheme
+    Card {
         Column(Modifier.padding(16.dp)) {
-            Text("Détails de la commande:", fontWeight = FontWeight.SemiBold)
+            Text(lang.get("order_details"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
-
             items.forEach { item ->
                 Row(
-                    modifier = Modifier
+                    Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
@@ -181,13 +139,13 @@ private fun OrderDetailsSection(items: List<CartItemUi>) {
                         modifier = Modifier
                             .size(40.dp)
                             .clip(MaterialTheme.shapes.small)
-                            .border(1.dp, PrimaryColor, MaterialTheme.shapes.small)
+                            .border(1.dp, colors.primary, MaterialTheme.shapes.small)
                     )
                     Spacer(Modifier.width(8.dp))
                     Column {
                         Text("- ${item.product.name} x${item.quantity}")
-                        item.addons.forEach { addon ->
-                            Text("  + ${addon.addon.name} (x${addon.quantity})", fontSize = 14.sp)
+                        item.addons.forEach {
+                            Text("  + ${it.addon.name} (x${it.quantity})", fontSize = 14.sp)
                         }
                     }
                 }
@@ -197,50 +155,26 @@ private fun OrderDetailsSection(items: List<CartItemUi>) {
 }
 
 @Composable
-private fun TotalSection(subtotal: Double, totalAmount: Double) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SecondaryColor)
-    ) {
+private fun TotalSection(lang: LanguageManager.Instance, subtotal: Double, totalAmount: Double) {
+    val colors = MaterialTheme.colorScheme
+    Card {
         Column(Modifier.padding(16.dp)) {
-            // Sous-total
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Sous-total:")
-                Text("${"%.2f".format(subtotal)} DH")
+            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                Text(lang.get("subtotal"))
+                Text("%.2f DH".format(subtotal))
             }
-
-            // Frais de livraison
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Frais de livraison:")
-                Text("${"%.2f".format(DELIVERY_FEE)} DH")
+            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                Text(lang.get("delivery_fee"))
+                Text("%.2f DH".format(DELIVERY_FEE))
             }
-
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = Color.LightGray
-            )
-
-            // Total
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Divider(Modifier.padding(vertical = 8.dp))
+            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                Text(lang.get("total"), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    "Total:",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Text(
-                    "${"%.2f".format(totalAmount)} DH",
-                    fontWeight = FontWeight.Bold,
+                    "%.2f DH".format(totalAmount),
                     fontSize = 18.sp,
-                    color = PrimaryColor
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary
                 )
             }
         }
@@ -248,24 +182,21 @@ private fun TotalSection(subtotal: Double, totalAmount: Double) {
 }
 
 @Composable
-fun StepIndicator(
-    iconRes: Int,
-    label: String,
-    isActive: Boolean
-) {
+fun StepIndicator(iconRes: Int, label: String, isActive: Boolean) {
+    val colors = MaterialTheme.colorScheme
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
-            modifier = Modifier
-                .size(StepOuterSize)
+            Modifier
+                .size(80.dp)
                 .clip(CircleShape)
-                .background(if (isActive) PrimaryColor.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.1f))
-                .border(2.dp, if (isActive) PrimaryColor else Color.LightGray, CircleShape),
+                .background(
+                    if (isActive) colors.primary.copy(0.1f)
+                    else colors.surfaceVariant.copy(0.1f)
+                )
+                .border(2.dp, if (isActive) colors.primary else colors.outline, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = label,
-                modifier = Modifier.size(StepInnerIconSize))
+            Image(painterResource(iconRes), label, Modifier.size(48.dp))
         }
         Spacer(Modifier.height(4.dp))
         Text(label, fontSize = 12.sp)
@@ -296,20 +227,16 @@ private fun getImageResource(name: String): Int = when (name) {
 
 private fun computeSubtotal(items: List<CartItemUi>): Double {
     return items.sumOf { item ->
-        // Conversion du prix du produit (String to Double)
         val productPrice = item.product.price
-            .replace("[^0-9.]".toRegex(), "") // Nettoyage
+            .replace("[^0-9.]".toRegex(), "")
             .toDoubleOrNull() ?: 0.0
 
-        // Application de la réduction si elle existe
         val discountedPrice = item.product.discountPercent?.let { discount ->
             productPrice * (100 - discount) / 100
         } ?: productPrice
 
-        // Calcul du total pour le produit
         val productTotal = discountedPrice * item.quantity
 
-        // Calcul des addons (Float to Double)
         val addonsTotal = item.addons.sumOf { addon ->
             addon.addon.price.toDouble() * addon.quantity
         }

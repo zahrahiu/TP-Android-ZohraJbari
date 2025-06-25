@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.emtyapp.ui.product.screens.HomeScreen
 import com.example.myapplication.ui.User.LoginScreen
 import com.example.myapplication.ui.User.RegisterScreen
 import com.example.myapplication.ui.cart.CartScreen
@@ -38,8 +37,9 @@ object Routes {
 fun AppNavigation(viewModel: ProductViewModel) {
     val nav = rememberNavController()
     val cartVM = remember { CartViewModel() }
+    val lang = LanguageManager.rememberLanguage()  // نحتفظ هنا بالحالة
 
-    NavHost(navController = nav, startDestination = Routes.Home) {
+    NavHost(navController = nav, startDestination = Routes.Login) {
 
         composable(Routes.Login) {
             LoginScreen(
@@ -59,6 +59,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
         composable(Routes.Home) {
             HomeScreen(
                 viewModel = viewModel,
+                lang = lang,
                 onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateToCart = { nav.navigate(Routes.Cart) },
@@ -70,11 +71,12 @@ fun AppNavigation(viewModel: ProductViewModel) {
         composable(Routes.Favorites) {
             FavoritesScreen(
                 viewModel = viewModel,
+                lang = lang,
                 onNavigateToDetails = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
-                onNavigateToHome = { nav.navigate(Routes.Home) },
-                onNavigateToFavorites = { /* stay */ },
-                onNavigateToCart = { nav.navigate(Routes.Cart) },
-                onNavigateToCategory = { nav.navigate(Routes.CategorySelection) }
+                onNavigateHome = { nav.navigate(Routes.Home) },
+                onNavigateFavorites = { /* stay */ },
+                onNavigateCart = { nav.navigate(Routes.Cart) },
+                onNavigateCategory = { nav.navigate(Routes.CategorySelection) }
             )
         }
 
@@ -88,6 +90,8 @@ fun AppNavigation(viewModel: ProductViewModel) {
                     product = prod,
                     navController = nav,
                     viewModel = viewModel,
+                    lang = lang,
+
                     onAddToCart = { selectedAddons ->
                         val ok = cartVM.addToCart(prod, selectedAddons)
                         if (ok) nav.navigate(Routes.Cart)
@@ -100,6 +104,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
         composable(Routes.Cart) {
             CartScreen(
                 viewModel = cartVM,
+                lang=lang,
                 onNavigateToHome = { nav.navigate(Routes.Home) },
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
@@ -114,7 +119,8 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateHome = { nav.navigate(Routes.Home) },
                 onNavigateFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateCart = { nav.navigate(Routes.Cart) },
-                currentRoute = Routes.CategorySelection
+                currentRoute = Routes.CategorySelection,
+                lang = lang,
             )
         }
 
@@ -131,8 +137,10 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateCart = { nav.navigate(Routes.Cart) },
                 onNavigateCategories = { nav.navigate(Routes.CategorySelection) },
-                currentRoute = Routes.CategoryProducts
-            )
+                currentRoute = Routes.CategoryProducts,
+                lang = lang,
+
+                )
         }
 
         composable(Routes.Checkout) {
@@ -149,7 +157,9 @@ fun AppNavigation(viewModel: ProductViewModel) {
                         popUpTo(Routes.Home) { inclusive = false }
                     }
                 }
-            )
+                ,                lang=lang,
+
+                )
         }
 
         composable(Routes.OrderSummary) { backStackEntry ->
@@ -178,6 +188,7 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 phone = phone,
                 address = address,
                 items = cartVM.items.value,
+                lang=lang,
 
                 onBackHome = {
                     nav.popBackStack(Routes.Home, false)

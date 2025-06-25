@@ -1,4 +1,5 @@
-package com.example.emtyapp.ui.product.screens
+/* ────────────────────────────  HomeScreen.kt  ─────────────────────────── */
+package com.example.myapplication.ui.product.screens
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -17,53 +18,59 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.navigator.Routes
-import com.google.accompanist.flowlayout.FlowRow
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.component.ProductsList
 import com.example.myapplication.ui.product.component.QuickFilter
 import com.example.myapplication.ui.theme.LocalThemeState
 import com.example.myapplication.ui.theme.Mode
+import com.google.accompanist.flowlayout.FlowRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: ProductViewModel = viewModel(),
+    lang: LanguageManager.Instance,
     onNavigateToDetails: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToCategory: () -> Unit,
     currentRoute: String = Routes.Home
 ) {
+    /* ─── language & theme ─────────────────────────────────────────────── */
     val themeState = LocalThemeState.current
-
-    var showMenu by remember { mutableStateOf(false) }
-
-    val state by viewModel.state.collectAsState()
+    var showMenu   by remember { mutableStateOf(false) }
+    var mainMenuExpanded    by remember { mutableStateOf(false) }
+    var langSubMenuExpanded by remember { mutableStateOf(false) }
+    var themeSubMenuExpanded by remember { mutableStateOf(false) }
+    /* ─── VM state ─────────────────────────────────────────────────────── */
+    val state       by viewModel.state.collectAsState()
     val favoriteIds by viewModel.favoriteIds.collectAsState()
 
-    var searchQuery by remember { mutableStateOf("") }
-    var showFilters by remember { mutableStateOf(false) }
-
-    val types = listOf("ROSE", "TULIP", "LILY", "ORCHID", "HIBISCUS", "LAVENDER", "DAISY", "PANSY")
-    val colors = listOf("RED", "WHITE", "YELLOW", "PINK", "PURPLE", "MULTICOLOR")
-    val occasions = listOf("LOVE", "BIRTHDAY", "WEDDING", "ANNIVERSARY", "APOLOGY", "THANKS")
-
-    var tType by remember { mutableStateOf<String?>(null) }
-    var tOccasion by remember { mutableStateOf<String?>(null) }
-    var tColors by remember { mutableStateOf(setOf<String>()) }
-    var pMin by remember { mutableStateOf("") }
-    var pMax by remember { mutableStateOf("") }
-
-    var aType by remember { mutableStateOf<String?>(null) }
-    var aOccasion by remember { mutableStateOf<String?>(null) }
-    var aColors by remember { mutableStateOf(setOf<String>()) }
-    var aPriceRange by remember { mutableStateOf(0f..400f) }
-
+    /* ─── UI state ─────────────────────────────────────────────────────── */
+    var searchQuery         by remember { mutableStateOf("") }
+    var showFilters         by remember { mutableStateOf(false) }
     var selectedQuickFilter by remember { mutableStateOf<QuickFilter?>(null) }
+
+    /* ─── filter data ──────────────────────────────────────────────────── */
+    val types     = listOf("ROSE","TULIP","LILY","ORCHID","HIBISCUS","LAVENDER","DAISY","PANSY")
+    val colors    = listOf("RED","WHITE","YELLOW","PINK","PURPLE","MULTICOLOR")
+    val occasions = listOf("LOVE","BIRTHDAY","WEDDING","ANNIVERSARY","APOLOGY","THANKS")
+
+    var tType     by remember { mutableStateOf<String?>(null) }
+    var tOccasion by remember { mutableStateOf<String?>(null) }
+    var tColors   by remember { mutableStateOf(setOf<String>()) }
+    var pMin      by remember { mutableStateOf("") }
+    var pMax      by remember { mutableStateOf("") }
+
+    var aType       by remember { mutableStateOf<String?>(null) }
+    var aOccasion   by remember { mutableStateOf<String?>(null) }
+    var aColors     by remember { mutableStateOf(setOf<String>()) }
+    var aPriceRange by remember { mutableStateOf(0f..400f) }
 
     fun parsePrice(min: String, max: String): ClosedFloatingPointRange<Float> {
         val mn = min.toFloatOrNull() ?: 0f
@@ -71,161 +78,210 @@ fun HomeScreen(
         return if (mn <= mx) mn..mx else mx..mn
     }
 
-    val filtered = state.products.filter { p ->
-        val matchesSearch = searchQuery.isBlank() ||
+    /* ─── filtering ────────────────────────────────────────────────────── */
+    val baseFiltered = state.products.filter { p ->
+        val okSearch   = searchQuery.isBlank() ||
                 p.name.contains(searchQuery, true) ||
                 p.description.contains(searchQuery, true)
-        val matchesType = aType == null || p.type.equals(aType, true)
-        val matchesOccasion = aOccasion == null || p.occasions.any { it.equals(aOccasion, true) }
-        val matchesColor = aColors.isEmpty() || p.colors.any { aColors.contains(it.uppercase()) }
-        val priceValue = p.price.replace("DH", "", true).replace(" ", "").replace(",", ".")
-            .toFloatOrNull() ?: 0f
-        val matchesPrice = priceValue in aPriceRange
-        matchesSearch && matchesType && matchesOccasion && matchesColor && matchesPrice
+        val okType     = aType == null      || p.type.equals(aType, true)
+        val okOccasion = aOccasion == null  || p.occasions.any { it.equals(aOccasion, true) }
+        val okColor    = aColors.isEmpty() || p.colors.any { it.uppercase() in aColors }
+        val price      = p.price.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
+        val okPrice    = price in aPriceRange
+        okSearch && okType && okOccasion && okColor && okPrice
     }
 
-    val quickFilteredProducts = when (selectedQuickFilter) {
-        QuickFilter.GIFT -> filtered.filter { it.category.equals("GIFT", ignoreCase = true) }
-        QuickFilter.MULTICOLOR -> filtered.filter { "MULTICOLOR" in it.colors }
-        QuickFilter.BASKET -> filtered.filter {
-            it.description.contains("panier", ignoreCase = true) ||
-                    it.description.contains("arrangement", ignoreCase = true)
+    val productsToShow = when (selectedQuickFilter) {
+        QuickFilter.GIFT       -> baseFiltered.filter { it.category.equals("GIFT", true) }
+        QuickFilter.MULTICOLOR -> baseFiltered.filter { "MULTICOLOR" in it.colors }
+        QuickFilter.BASKET     -> baseFiltered.filter {
+            it.description.contains("panier", true) ||
+                    it.description.contains("arrangement", true)
         }
-        null -> filtered
+        null -> baseFiltered
     }
 
+    /* ─────────────────────────────── UI ──────────────────────────────── */
     Scaffold(
+        /* ── Top bar ─────────────────────── */
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "🌸 Flora Boutique",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Black
-                    )
+                    Text("🌸 Flora Boutique",
+                        color      = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Black)
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 actions = {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Changer la langue") },
-                            onClick = {
-                                // TODO: implement language change
-                                showMenu = false
-                            }
-                        )
-                        Divider()
-                        DropdownMenuItem(
-                            text = { Text("Mode Clair") },
-                            onClick = {
-                                themeState.mode = Mode.CLAIR
-                                showMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Mode Sombre") },
-                            onClick = {
-                                themeState.mode = Mode.SOMBRE
-                                showMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Mode Pastel") },
-                            onClick = {
-                                themeState.mode = Mode.PASTEL
-                                showMenu = false
-                            }
-                        )
+                    Box {
+                        IconButton(onClick = { mainMenuExpanded = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = null)
+                        }
+
+                        /* ── MAIN MENU ── */
+                        DropdownMenu(
+                            expanded = mainMenuExpanded,
+                            onDismissRequest = { mainMenuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Language") },
+                                trailingIcon = {
+                                    Icon(Icons.Default.ArrowDropDown, null, Modifier.rotate(-90f))
+                                },
+                                onClick = {
+                                    langSubMenuExpanded = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Theme") },
+                                trailingIcon = {
+                                    Icon(Icons.Default.ArrowDropDown, null, Modifier.rotate(-90f))
+                                },
+                                onClick = {
+                                    themeSubMenuExpanded = true
+                                }
+                            )
+                        }
+
+                        /* ── LANGUAGE SUB MENU ── */
+                        DropdownMenu(
+                            expanded = langSubMenuExpanded,
+                            offset = DpOffset(150.dp, 0.dp),
+                            onDismissRequest = { langSubMenuExpanded = false }
+                        ) {
+                            DropdownMenuItem(text = { Text("Français") },
+                                onClick = {
+                                    lang.onChange(LanguageManager.Lang.FR)
+                                    langSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                            DropdownMenuItem(text = { Text("English") },
+                                onClick = {
+                                    lang.onChange(LanguageManager.Lang.EN)
+                                    langSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                            DropdownMenuItem(text = { Text("العربية") },
+                                onClick = {
+                                    lang.onChange(LanguageManager.Lang.AR)
+                                    langSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                        }
+
+                        /* ── THEME SUB MENU ── */
+                        DropdownMenu(
+                            expanded = themeSubMenuExpanded,
+                            offset = DpOffset(150.dp, 0.dp),
+                            onDismissRequest = { themeSubMenuExpanded = false }
+                        ) {
+                            DropdownMenuItem(text = { Text("Mode Clair") },
+                                onClick = {
+                                    themeState.mode = Mode.CLAIR
+                                    themeSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                            DropdownMenuItem(text = { Text("Mode Sombre") },
+                                onClick = {
+                                    themeState.mode = Mode.SOMBRE
+                                    themeSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                            DropdownMenuItem(text = { Text("Mode Pastel") },
+                                onClick = {
+                                    themeState.mode = Mode.PASTEL
+                                    themeSubMenuExpanded = false
+                                    mainMenuExpanded = false
+                                })
+                        }
                     }
                 }
             )
         },
-        containerColor = MaterialTheme.colorScheme.background,
+
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
-                    onClick = {},
-                    icon = { Text("🏠", fontSize = 20.sp) },
-                    label = { Text("Home") }
+                    icon     = { Text("🏠", fontSize = 20.sp) },
+                    label    = { Text(lang.get("home")) },
+                    onClick  = {}
                 )
                 NavigationBarItem(
-                    selected = false,
-                    onClick = onNavigateToCategory,
-                    icon = { Text("🪷", fontSize = 20.sp) },
-                    label = { Text("Catégories") }
+                    selected = currentRoute == Routes.CategorySelection,
+                    icon     = { Text("🪷", fontSize = 20.sp) },
+                    label    = { Text(lang.get("categories")) },
+                    onClick  = onNavigateToCategory
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Favorites,
-                    onClick = onNavigateToFavorites,
-                    icon = { Text("❤", fontSize = 20.sp) },
-                    label = { Text("Favoris") }
+                    icon     = { Text("❤", fontSize = 20.sp) },
+                    label    = { Text(lang.get("favorites")) },
+                    onClick  = onNavigateToFavorites
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Cart,
-                    onClick = onNavigateToCart,
-                    icon = { Text("🛒", fontSize = 20.sp) },
-                    label = { Text("Panier") }
+                    icon     = { Text("🛒", fontSize = 20.sp) },
+                    label    = { Text(lang.get("cart")) },
+                    onClick  = onNavigateToCart
                 )
             }
-        }
+        },
+
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
+
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
+
+            /* ── search + filtre chip ─────────────────────────────────── */
             Row(
                 Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment  = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = searchQuery,
+                    value         = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("🔍 Rechercher...") },
-                    leadingIcon = { Icon(Icons.Default.Search, null) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
+                    placeholder   = { Text(lang.get("search_placeholder")) },
+                    leadingIcon   = { Icon(Icons.Default.Search, null) },
+                    singleLine    = true,
+                    shape         = RoundedCornerShape(12.dp),
+                    colors        = TextFieldDefaults.colors(
+                        focusedContainerColor   = Color.White,
                         unfocusedContainerColor = Color.White
                     ),
-                    singleLine = true
+                    modifier      = Modifier.weight(1f)
                 )
+
                 FilterChip(
                     selected = showFilters,
-                    onClick = { showFilters = !showFilters },
-                    label = { Text("Filtres") },
+                    onClick  = { showFilters = !showFilters },
+                    label    = { Text(lang.get("filters")) },
                     leadingIcon = {
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            null,
-                            Modifier.rotate(if (showFilters) 180f else 0f)
-                        )
+                        Icon(Icons.Default.ArrowDropDown, null,
+                            Modifier.rotate(if (showFilters) 180f else 0f))
                     },
-                    colors = FilterChipDefaults.filterChipColors(
+                    colors   = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
+                        selectedLabelColor     = MaterialTheme.colorScheme.primary
                     )
                 )
             }
 
             Spacer(Modifier.height(8.dp))
 
+            /* ── panneau de filtres ───────────────────────────────────── */
             AnimatedVisibility(
                 visible = showFilters,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+                enter   = fadeIn()  + expandVertically(),
+                exit    = fadeOut() + shrinkVertically()
             ) {
                 Column(
                     Modifier
@@ -236,15 +292,18 @@ fun HomeScreen(
                 ) {
                     var tab by remember { mutableStateOf<String?>(null) }
 
-                    Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(12.dp)) {
-                        listOf("Type", "Couleur", "Occasion").forEach { t ->
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        listOf("Type","Couleur","Occasion").forEach { t ->
                             FilterChip(
                                 selected = tab == t,
-                                onClick = { tab = if (tab == t) null else t },
-                                label = { Text(t) },
-                                colors = FilterChipDefaults.filterChipColors(
+                                onClick  = { tab = if (tab == t) null else t },
+                                label    = { Text(t) },
+                                colors   = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    selectedLabelColor = MaterialTheme.colorScheme.primary
+                                    selectedLabelColor     = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
@@ -257,27 +316,19 @@ fun HomeScreen(
                             types.forEach { t ->
                                 FilterChip(
                                     selected = tType == t,
-                                    onClick = { tType = if (tType == t) null else t },
-                                    label = { Text(t) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    onClick  = { tType = if (tType == t) null else t },
+                                    label    = { Text(t) }
                                 )
                             }
                         }
                         "Couleur" -> FlowRow(mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
                             colors.forEach { c ->
                                 FilterChip(
-                                    selected = tColors.contains(c),
-                                    onClick = {
-                                        tColors = if (tColors.contains(c)) tColors - c else tColors + c
+                                    selected = c in tColors,
+                                    onClick  = {
+                                        tColors = if (c in tColors) tColors - c else tColors + c
                                     },
-                                    label = { Text(c) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    label    = { Text(c) }
                                 )
                             }
                         }
@@ -285,17 +336,13 @@ fun HomeScreen(
                             occasions.forEach { o ->
                                 FilterChip(
                                     selected = tOccasion == o,
-                                    onClick = { tOccasion = if (tOccasion == o) null else o },
-                                    label = { Text(o) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    onClick  = { tOccasion = if (tOccasion == o) null else o },
+                                    label    = { Text(o) }
                                 )
                             }
                         }
                         null -> Text(
-                            "Sélectionnez un filtre pour afficher les options",
+                            lang.get("select_filter"),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 12.dp)
                         )
@@ -303,86 +350,88 @@ fun HomeScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         OutlinedTextField(
                             value = pMin,
-                            singleLine = true,
                             onValueChange = { pMin = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                            label = { Text("Prix Min") },
+                            label = { Text(lang.get("price_min")) },
+                            singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = pMax,
-                            singleLine = true,
                             onValueChange = { pMax = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                            label = { Text("Prix Max") },
+                            label = { Text(lang.get("price_max")) },
+                            singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(16.dp)) {
-                        TextButton(onClick = {
-                            tType = null
-                            tOccasion = null
-                            tColors = emptySet()
-                            pMin = ""
-                            pMax = ""
-                        }) {
-                            Text("Réinitialiser", color = MaterialTheme.colorScheme.primary)
-                        }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        TextButton(
+                            onClick = {
+                                tType = null ; tOccasion = null ; tColors = emptySet()
+                                pMin  = ""   ; pMax      = ""
+                            }
+                        ) { Text(lang.get("reset")) }
 
-                        Button(onClick = {
-                            aType = tType
-                            aOccasion = tOccasion
-                            aColors = tColors
-                            aPriceRange = parsePrice(pMin, pMax)
-                            showFilters = false
-                        }) {
-                            Text("Appliquer")
-                        }
+                        Button(
+                            onClick = {
+                                aType       = tType
+                                aOccasion   = tOccasion
+                                aColors     = tColors
+                                aPriceRange = parsePrice(pMin, pMax)
+                                showFilters = false
+                            }
+                        ) { Text(lang.get("apply")) }
                     }
                 }
             }
 
             Spacer(Modifier.height(8.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            /* ── titre central ────────────────────────────────────────── */
+            Box(Modifier.fillMaxWidth(), Alignment.Center) {
                 Text(
-                    text = "\uD83D\uDC90 Trouve ta fleur préférée \uD83D\uDC90",
-                    fontSize = 18.sp,
+                    lang.get("find_flower"),
+                    fontSize   = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color      = MaterialTheme.colorScheme.primary
                 )
             }
 
             Spacer(Modifier.height(8.dp))
 
+            /* ── liste produits / état ─────────────────────────────────── */
             Box(Modifier.weight(1f)) {
                 when {
                     state.isLoading -> Center {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                     state.error != null -> Center {
-                        Text("Erreur: ${state.error}", color = Color.Red)
+                        Text("${lang.get("error")}: ${state.error}", color = Color.Red)
                     }
-                    quickFilteredProducts.isEmpty() -> Center {
-                        Text("Aucun produit trouvé")
+                    productsToShow.isEmpty() -> Center {
+                        Text(lang.get("no_products"))
                     }
                     else -> ProductsList(
-                        products = quickFilteredProducts,
-                        favoriteProductIds = favoriteIds,
-                        onNavigateToDetails = onNavigateToDetails,
-                        onToggleFavorite = viewModel::toggleFavorite,
-                        onRateProduct = { id, rating -> viewModel.updateProductRating(id, rating) },
-                        selectedQuickFilter = selectedQuickFilter,
-                        onQuickFilterSelected = { selectedQuickFilter = it }
+                        products              = productsToShow,
+                        favoriteProductIds    = favoriteIds,
+                        selectedQuickFilter   = selectedQuickFilter,
+                        onQuickFilterSelected = { selectedQuickFilter = it },
+                        onNavigateToDetails   = onNavigateToDetails,
+                        onToggleFavorite      = viewModel::toggleFavorite,
+                        lang = lang,
+
+                        onRateProduct         = { id, rate -> viewModel.updateProductRating(id, rate) }
                     )
                 }
             }
@@ -390,11 +439,4 @@ fun HomeScreen(
     }
 }
 
-@Composable
-fun Center(content: @Composable BoxScope.() -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-        content = content
-    )
-}
+

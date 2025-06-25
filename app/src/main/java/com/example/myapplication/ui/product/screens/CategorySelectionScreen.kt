@@ -19,16 +19,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.navigator.Routes
+import com.example.myapplication.ui.theme.LocalThemeState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategorySelectionScreen(
+    lang: LanguageManager.Instance,    // هنا
     onCategorySelected: (String) -> Unit,
     onNavigateHome: () -> Unit,
     onNavigateFavorites: () -> Unit,
     onNavigateCart: () -> Unit,
     currentRoute: String = Routes.CategorySelection
 ) {
+    val themeState = LocalThemeState.current
+
     val categories = listOf(
         "ROSES" to "img_rose",
         "FLOWERS" to "img_flowers",
@@ -41,41 +45,43 @@ fun CategorySelectionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "🌸 Flora Boutique - Catégories",
+                        "🌸 Flora Boutique - ${lang.get("categories")}",  // بدل النص الصلب
                         color = Color(0xFFDC4C3E),
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF8F0))
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
-        containerColor = Color(0xFFFFFBF7),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFFFFF8F0)) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
                 NavigationBarItem(
                     selected = currentRoute == Routes.Home,
                     onClick = onNavigateHome,
                     icon = { Text("🏠", fontSize = 20.sp) },
-                    label = { Text("Home") }
+                    label = { Text(lang.get("home")) }   // بدل النص
                 )
                 NavigationBarItem(
-                    selected = true, // Ici on est dans catégories
-                    onClick = { /* rester ici */ },
+                    selected = true,
+                    onClick = { },
                     icon = { Text("🪷", fontSize = 20.sp) },
-                    label = { Text("Catégories") }
+                    label = { Text(lang.get("categories")) } // بدل النص
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Favorites,
                     onClick = onNavigateFavorites,
                     icon = { Text("❤", fontSize = 20.sp) },
-                    label = { Text("Favoris") }
+                    label = { Text(lang.get("favorites")) } // بدل النص
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Cart,
                     onClick = onNavigateCart,
                     icon = { Text("🛒", fontSize = 20.sp) },
-                    label = { Text("Panier") }
+                    label = { Text(lang.get("cart")) } // بدل النص
                 )
             }
         },
@@ -119,7 +125,7 @@ fun CategorySelectionScreen(
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 Text(
-                                    text = category,
+                                    text = category,  // هادي تقدر تدير ترجمة لو بغيتي
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFFDC4C3E)
@@ -133,11 +139,7 @@ fun CategorySelectionScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
-
-                // Footer
-
             }
         }
     )

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.screens.LanguageManager
 
 @Composable
 fun ProductsList(
@@ -18,7 +19,9 @@ fun ProductsList(
     onNavigateToDetails: (String) -> Unit,
     onToggleFavorite: (Product) -> Unit,
     onRateProduct: (String, Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lang: LanguageManager.Instance,    // هنا
+
 ) {
     val rows = products.chunked(2)
 
@@ -62,6 +65,7 @@ fun ProductsList(
                         onItemClick      = { onNavigateToDetails(product.id) },
                         onFavoriteClick  = { onToggleFavorite(product) },
                         onRateProduct    = { rating -> onRateProduct(product.id, rating) },
+                        lang = lang,
                         modifier         = Modifier
                             .weight(1f)
                             .padding(horizontal = 4.dp)

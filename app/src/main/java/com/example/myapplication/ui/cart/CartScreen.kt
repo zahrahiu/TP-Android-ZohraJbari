@@ -20,14 +20,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
+import com.example.myapplication.ui.product.screens.LanguageManager
 import kotlinx.coroutines.launch
 
-// Couleurs mises à jour selon votre demande
 val RougeFlora = Color(0xFFDC4C3E)      // Rouge cerise
-val BeigeFlora = Color(0xFFFFFBF7)      // Beige clair (identique à BeigeBackground)
+val BeigeFlora = Color(0xFFFFFBF7)      // Beige clair
 val GrisPetitGris = Color(0xFF8E8E93)   // Gris doux
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,8 +39,10 @@ fun CartScreen(
     onNavigateToFavorites: () -> Unit,
     onNavigateToCategory: () -> Unit,
     onNavigateToCart: () -> Unit,
-    onNavigateToCheckout: () -> Unit
+    onNavigateToCheckout: () -> Unit,
+    lang: LanguageManager.Instance
 ) {
+    val colors = MaterialTheme.colorScheme
     val items = viewModel.items.collectAsState().value
     val snackHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -66,47 +69,52 @@ fun CartScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Mon Panier", color = RougeFlora, fontWeight = FontWeight.Bold) },
+                title = { Text(lang.get("cart"), color = colors.primary, fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = BeigeFlora,
-                    titleContentColor = RougeFlora
+                    containerColor = colors.background,
+                    titleContentColor = colors.primary
                 )
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = BeigeFlora) {
+            NavigationBar(containerColor = colors.background) {
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToHome,
                     icon = { Text("🏠", fontSize = 20.sp) },
-                    label = { Text("Home") }
+                    label = { Text(lang.get("home")) }
                 )
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToCategory,
                     icon = { Text("🪷", fontSize = 20.sp) },
-                    label = { Text("Catégories") }
+                    label = { Text(lang.get("categories")) }
                 )
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToFavorites,
                     icon = { Text("❤", fontSize = 20.sp) },
-                    label = { Text("Favoris") }
+                    label = { Text(lang.get("favorites")) }
                 )
                 NavigationBarItem(
                     selected = true,
                     onClick = onNavigateToCart,
                     icon = { Text("🛒", fontSize = 20.sp) },
-                    label = { Text("Panier") }
+                    label = { Text(lang.get("cart")) }
                 )
             }
         },
         snackbarHost = { SnackbarHost(snackHostState) },
-        containerColor = BeigeFlora
+        containerColor = colors.background
     ) { pad ->
         if (items.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(pad), contentAlignment = Alignment.Center) {
-                Text("Panier vide", color = GrisPetitGris, fontWeight = FontWeight.Medium)
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(pad),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(lang.get("cart") + " " + lang.get("empty"), color = GrisPetitGris, fontWeight = FontWeight.Medium)
             }
             return@Scaffold
         }
@@ -115,7 +123,7 @@ fun CartScreen(
             Modifier
                 .fillMaxSize()
                 .padding(pad)
-                .background(BeigeFlora)
+                .background(colors.background)
         ) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -178,22 +186,22 @@ fun CartScreen(
                                 if (ci.product.discountPercent != null) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            "${originalPrice.toInt()} DH",
+                                            "${originalPrice.toInt()} ${lang.get("currency")}",
                                             color = Color.Gray,
                                             textDecoration = TextDecoration.LineThrough,
                                             fontSize = 14.sp
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            "${discountedPrice.toInt()} DH",
-                                            color = RougeFlora,
+                                            "${discountedPrice.toInt()} ${lang.get("currency")}",
+                                            color = colors.primary,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 16.sp
                                         )
                                     }
                                 } else {
                                     Text(
-                                        "${originalPrice.toInt()} DH",
+                                        "${originalPrice.toInt()} ${lang.get("currency")}",
                                         color = Color.Black,
                                         fontSize = 16.sp
                                     )
@@ -204,7 +212,7 @@ fun CartScreen(
                                     modifier = Modifier.padding(top = 8.dp)
                                 ) {
                                     IconButton(onClick = { viewModel.dec(ci) }) {
-                                        Icon(Icons.Filled.Remove, contentDescription = "Décrementer", tint = Color.Black)
+                                        Icon(Icons.Filled.Remove, contentDescription = lang.get("decrement"), tint = RougeFlora)
                                     }
                                     Text(
                                         "${ci.quantity}",
@@ -212,18 +220,20 @@ fun CartScreen(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp,
                                         modifier = Modifier.width(32.dp),
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                        textAlign = TextAlign.Center
                                     )
                                     IconButton(
                                         onClick = {
                                             val ok = viewModel.inc(ci)
                                             if (!ok) scope.launch {
-                                                snackHostState.showSnackbar("Stock insuffisant pour ${ci.product.name}")
+                                                snackHostState.showSnackbar(
+                                                    "${lang.get("stock_insufficient")} ${ci.product.name}"
+                                                )
                                             }
                                         },
                                         enabled = !outOfStock
                                     ) {
-                                        Icon(Icons.Filled.Add, contentDescription = "Incrémenter", tint = Color.Black)
+                                        Icon(Icons.Filled.Add, contentDescription = lang.get("increment"), tint = RougeFlora)
                                     }
                                 }
                             }
@@ -238,13 +248,13 @@ fun CartScreen(
                                 horizontalAlignment = Alignment.End
                             ) {
                                 IconButton(onClick = { viewModel.removeProduct(ci) }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Supprimer produit", tint = Color.Black)
+                                    Icon(Icons.Filled.Delete, contentDescription = lang.get("remove_product"), tint = RougeFlora)
                                 }
                                 IconButton(onClick = { expanded = !expanded }) {
                                     Icon(
                                         imageVector = if (expanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowRight,
-                                        contentDescription = if (expanded) "Réduire" else "Détails",
-                                        tint = Color.Black
+                                        contentDescription = if (expanded) lang.get("collapse") else lang.get("details"),
+                                        tint = colors.primary
                                     )
                                 }
                             }
@@ -269,11 +279,11 @@ fun CartScreen(
                                             fontSize = 16.sp
                                         )
                                         IconButton(onClick = { viewModel.decAddon(ci, aq) }) {
-                                            Icon(Icons.Filled.Remove, contentDescription = "Décrementer addon", tint = Color.Black)
+                                            Icon(Icons.Filled.Remove, contentDescription = lang.get("decrement_addon"), tint = RougeFlora)
                                         }
                                         Text("${aq.quantity}", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                         IconButton(onClick = { viewModel.incAddon(ci, aq) }) {
-                                            Icon(Icons.Filled.Add, contentDescription = "Incrémenter addon", tint = Color.Black)
+                                            Icon(Icons.Filled.Add, contentDescription = lang.get("increment_addon"), tint = RougeFlora)
                                         }
                                     }
                                 }
@@ -303,13 +313,13 @@ fun CartScreen(
                 ) {
                     Column {
                         Text(
-                            "Prix Total",
+                            lang.get("total_price"),
                             fontWeight = FontWeight.Normal,
-                            color = RougeFlora,
+                            color = colors.primary,
                             fontSize = 16.sp
                         )
                         Text(
-                            String.format("%.2f DH", totalPrice),
+                            String.format("%.2f %s", totalPrice, lang.get("currency")),
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
                             fontSize = 20.sp
@@ -319,7 +329,7 @@ fun CartScreen(
                     Button(
                         onClick = { onNavigateToCheckout() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = RougeFlora,
+                            containerColor = colors.primary,
                             contentColor = Color.White
                         ),
                         shape = MaterialTheme.shapes.small,
@@ -327,7 +337,7 @@ fun CartScreen(
                         modifier = Modifier.padding(start = 30.dp)
                     ) {
                         Text(
-                            "Passer Commande",
+                            lang.get("checkout"),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )

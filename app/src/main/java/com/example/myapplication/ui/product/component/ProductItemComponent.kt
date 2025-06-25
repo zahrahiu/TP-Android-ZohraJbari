@@ -5,12 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.product.screens.LanguageManager
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -35,7 +35,8 @@ fun ProductItem(
     onFavoriteClick: () -> Unit,
     onRateProduct: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    showRating: Boolean = true
+    showRating: Boolean = true,
+    lang: LanguageManager.Instance // هنا دوزنا اللانغ ديالك
 ) {
     val imgRes = getImageResource(product.image)
 
@@ -139,14 +140,14 @@ fun ProductItem(
                     modifier = Modifier.padding(top = 2.dp)
                 ) {
                     Text(
-                        "%.0f DH".format(oldPrice),
+                        "%.0f %s".format(oldPrice, lang.get("currency")),
                         fontSize = 10.sp,
                         color = Color(0xFF8D6E63),
                         textDecoration = TextDecoration.LineThrough
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        "%.0f DH".format(newPrice),
+                        "%.0f %s".format(newPrice, lang.get("currency")),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFDC143C)
@@ -154,7 +155,7 @@ fun ProductItem(
                 }
             } else {
                 Text(
-                    product.price,
+                    "${product.price} ${lang.get("currency")}",
                     fontSize = 13.sp,
                     color = Color(0xFF8D6E63),
                     modifier = Modifier.padding(top = 2.dp)
