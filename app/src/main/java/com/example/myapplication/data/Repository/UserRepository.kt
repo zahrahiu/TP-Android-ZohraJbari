@@ -7,11 +7,22 @@ object UserRepository {
         val password: String,
         val nom: String,
         val prenom: String,
-        val telephone: String
+        val telephone: String,
+        val isAdmin: Boolean = false
     )
 
-    private val users = mutableMapOf<String, User>()
 
+
+    private val users = mutableMapOf(
+        "admin@gmail.com" to User(
+            email = "admin@gmail.com",
+            password = "admin",
+            nom = "Admin",
+            prenom = "Admin",
+            telephone = "0000000000",
+            isAdmin = true
+        )
+    )
 
     fun register(
         email: String,
@@ -26,8 +37,10 @@ object UserRepository {
     }
 
 
-    fun login(email: String, password: String): Boolean =
-        users[email]?.password == password
+
+
+    fun login(email: String, password: String): User? =
+        users[email]?.takeIf { it.password == password }
 
 
     fun getUser(email: String): User? = users[email]

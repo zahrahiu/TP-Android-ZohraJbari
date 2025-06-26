@@ -35,6 +35,17 @@ class ProductViewModel @Inject constructor(
         }
     }
 
+    fun updateProductQuantity(productId: String, newQuantity: Int) {
+        _state.update { currentState ->
+            currentState.copy(
+                products = currentState.products.map {
+                    if (it.id == productId) it.copy(quantity = newQuantity) else it
+                }
+            )
+        }
+    }
+
+
     fun updateProductRating(productId: String, newRating: Int) {
         viewModelScope.launch {
             repository.updateProductRating(productId, newRating)

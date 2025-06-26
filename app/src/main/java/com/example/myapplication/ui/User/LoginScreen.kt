@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.data.Repository.UserRepository
 
-val RougeFlora = Color(0xFFDC4C3E)
+val RougeFlora = Color(0xFF989D71)
 val BeigeFlora = Color(0xFFFFF8F0)
 val BeigeBackground = Color(0xFFFFFFFF)
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
+fun LoginScreen(onUserLogin: () -> Unit,onAdminLogin: () -> Unit, onNavigateToRegister: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMsg by remember { mutableStateOf("") }
@@ -109,9 +109,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
                 Button(
                     onClick = {
-                        if (UserRepository.login(email, password)) {
-                            errorMsg = ""
-                            onLoginSuccess()
+                        val user = UserRepository.login(email, password)
+                        if (user != null) {
+                            if (user.isAdmin) onAdminLogin() else onUserLogin()
                         } else {
                             errorMsg = "Email ou mot de passe incorrect"
                         }

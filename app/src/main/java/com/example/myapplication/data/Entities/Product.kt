@@ -12,7 +12,7 @@ data class Product(
     @SerializedName("productImage")
     val image: String,
     @SerializedName("quantity")
-    val quantity: String,
+    val quantity: Int,
     @SerializedName("productPrice")
     val price: String,
     @SerializedName("type")

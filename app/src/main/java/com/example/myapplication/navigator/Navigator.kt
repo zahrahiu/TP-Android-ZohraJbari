@@ -3,11 +3,13 @@ package com.example.myapplication.navigator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.myapplication.ui.User.AdminScreen
 import com.example.myapplication.ui.User.LoginScreen
 import com.example.myapplication.ui.User.RegisterScreen
 import com.example.myapplication.ui.cart.CartScreen
@@ -36,17 +38,22 @@ object Routes {
 @Composable
 fun AppNavigation(viewModel: ProductViewModel) {
     val nav = rememberNavController()
-    val cartVM = remember { CartViewModel() }
-    val lang = LanguageManager.rememberLanguage()  // نحتفظ هنا بالحالة
+    val cartVM: CartViewModel = hiltViewModel()
+    val lang = LanguageManager.rememberLanguage()
 
     NavHost(navController = nav, startDestination = Routes.Login) {
 
-        composable(Routes.Login) {
+        composable("login") {
             LoginScreen(
-                onLoginSuccess = { nav.navigate(Routes.Home) { popUpTo(Routes.Login) { inclusive = true } } },
-                onNavigateToRegister = { nav.navigate(Routes.Register) }
+                onUserLogin  = { nav.navigate("home")  { popUpTo("login") {inclusive = true} } },
+                onAdminLogin = { nav.navigate("admin") { popUpTo("login") {inclusive = true} } },
+                onNavigateToRegister = { nav.navigate("register") }
             )
         }
+
+        composable("admin")  { AdminScreen()  }
+
+
 
         composable(Routes.Register) {
             RegisterScreen(
@@ -64,7 +71,12 @@ fun AppNavigation(viewModel: ProductViewModel) {
                 onNavigateToFavorites = { nav.navigate(Routes.Favorites) },
                 onNavigateToCart = { nav.navigate(Routes.Cart) },
                 onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
-                currentRoute = Routes.Home
+                currentRoute = Routes.Home,
+                onLogout = {                       // ⇦ هنا التوجيه الفعلي
+                    nav.navigate("Login") {
+                        popUpTo(Routes.Home) { inclusive = true }
+                    }
+                }
             )
         }
 

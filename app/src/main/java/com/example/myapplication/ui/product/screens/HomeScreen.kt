@@ -39,7 +39,8 @@ fun HomeScreen(
     onNavigateToFavorites: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToCategory: () -> Unit,
-    currentRoute: String = Routes.Home
+    currentRoute: String = Routes.Home,
+    onLogout: () -> Unit
 ) {
     /* ─── language & theme ─────────────────────────────────────────────── */
     val themeState = LocalThemeState.current
@@ -90,7 +91,9 @@ fun HomeScreen(
         val okPrice    = price in aPriceRange
         okSearch && okType && okOccasion && okColor && okPrice
     }
+    var logoutDialogVisible by remember { mutableStateOf(false) }
 
+    var deactivateDialogVisible by remember { mutableStateOf(false) }
     val productsToShow = when (selectedQuickFilter) {
         QuickFilter.GIFT       -> baseFiltered.filter { it.category.equals("GIFT", true) }
         QuickFilter.MULTICOLOR -> baseFiltered.filter { "MULTICOLOR" in it.colors }
@@ -101,9 +104,8 @@ fun HomeScreen(
         null -> baseFiltered
     }
 
-    /* ─────────────────────────────── UI ──────────────────────────────── */
+
     Scaffold(
-        /* ── Top bar ─────────────────────── */
         topBar = {
             TopAppBar(
                 title = {
@@ -143,9 +145,17 @@ fun HomeScreen(
                                     themeSubMenuExpanded = true
                                 }
                             )
+                            Divider()
+                            DropdownMenuItem(
+                                text = { Text("Se déconnecter") },
+                                onClick = {
+                                    logoutDialogVisible = true
+                                    mainMenuExpanded   = false
+                                }
+                            )
+
                         }
 
-                        /* ── LANGUAGE SUB MENU ── */
                         DropdownMenu(
                             expanded = langSubMenuExpanded,
                             offset = DpOffset(150.dp, 0.dp),
@@ -199,7 +209,30 @@ fun HomeScreen(
                     }
                 }
             )
+            /* ─── ALERT: Se déconnecter ─────────────────────────────────────── */
+            if (logoutDialogVisible) {
+                AlertDialog(
+                    onDismissRequest = { logoutDialogVisible = false },
+                    title   = { Text("Confirmation") },
+                    text    = { Text("Êtes-vous sûr(e) de vouloir vous déconnecter ?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            logoutDialogVisible = false
+                            onLogout()          // ⇦ ما بقى احتياج لـ navController هنا
+                        }) { Text("Oui")  }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { logoutDialogVisible = false }) {
+                            Text("Non")
+                        }
+                    }
+                )
+            }
+
+
+
         },
+
 
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.background) {

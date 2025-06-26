@@ -15,7 +15,7 @@ class ThemeState {
 val LocalThemeState = staticCompositionLocalOf { ThemeState() }
 
 val LightScheme = lightColorScheme(
-    primary = Color(0xFFDC4C3E),
+    primary = Color(0xFF989D71),
     background = Color(0xFFFFFBF7),
 )
 

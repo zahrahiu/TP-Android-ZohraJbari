@@ -18,7 +18,7 @@ import com.example.myapplication.ui.theme.LocalThemeState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryProductsScreen(
-    lang: LanguageManager.Instance,      // زدت هاد البراميتر
+    lang: LanguageManager.Instance,
     viewModel: ProductViewModel,
     category: String,
     onNavigateToDetails: (String) -> Unit,
@@ -51,8 +51,8 @@ fun CategoryProductsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "🌸 $category",  // ممكن تحوّل category لترجمة لو عندك keys
-                        color = Color(0xFFDC4C3E),
+                        text = "🌸 $category",
+                        color = MaterialTheme.colorScheme.primary ,
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )
@@ -67,25 +67,25 @@ fun CategoryProductsScreen(
                     selected = currentRoute == Routes.Home,
                     onClick = onNavigateHome,
                     icon = { Text("🏠", fontSize = 20.sp) },
-                    label = { Text(lang.get("home")) }  // استبدل hardcoded
+                    label = { Text(lang.get("home")) }
                 )
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateCategories,
                     icon = { Text("🪷", fontSize = 20.sp) },
-                    label = { Text(lang.get("categories")) } // استبدل hardcoded
+                    label = { Text(lang.get("categories")) }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Favorites,
                     onClick = onNavigateFavorites,
                     icon = { Text("❤", fontSize = 20.sp) },
-                    label = { Text(lang.get("favorites")) }  // استبدل hardcoded
+                    label = { Text(lang.get("favorites")) }
                 )
                 NavigationBarItem(
                     selected = currentRoute == Routes.Cart,
                     onClick = onNavigateCart,
                     icon = { Text("🛒", fontSize = 20.sp) },
-                    label = { Text(lang.get("cart")) }  // استبدل hardcoded
+                    label = { Text(lang.get("cart")) }
                 )
             }
         }
@@ -99,7 +99,7 @@ fun CategoryProductsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    lang.get("no_products"),   // بدل النص مباشرة للغة المختارة
+                    lang.get("no_products"),
                     color = Color.Gray,
                     fontSize = 16.sp
                 )

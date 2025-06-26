@@ -46,8 +46,7 @@ fun CategorySelectionScreen(
                 title = {
                     Text(
                         "🌸 Flora Boutique - ${lang.get("categories")}",  // بدل النص الصلب
-                        color = Color(0xFFDC4C3E),
-                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary,                        fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )
                 },
@@ -128,13 +127,13 @@ fun CategorySelectionScreen(
                                     text = category,  // هادي تقدر تدير ترجمة لو بغيتي
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFFDC4C3E)
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
                                 contentDescription = "Aller vers $category",
-                                tint = Color(0xFFDC4C3E)
+                                tint =  MaterialTheme.colorScheme.primary
                             )
                         }
                     }

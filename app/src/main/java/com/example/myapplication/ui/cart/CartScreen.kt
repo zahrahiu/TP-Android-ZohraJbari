@@ -131,7 +131,7 @@ fun CartScreen(
             ) {
                 items(items) { ci ->
                     var expanded by remember { mutableStateOf(false) }
-                    val maxStock = ci.product.quantity.toIntOrNull() ?: Int.MAX_VALUE
+                    val maxStock = ci.product.quantity
                     val outOfStock = ci.quantity >= maxStock
                     val originalPrice = parsePrice(ci.product.price)
                     val discountedPrice = calculateDiscountedPrice(originalPrice, ci.product.discountPercent)

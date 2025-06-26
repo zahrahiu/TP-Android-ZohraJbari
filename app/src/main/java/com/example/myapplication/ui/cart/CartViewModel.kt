@@ -1,26 +1,33 @@
+// ui/cart/CartViewModel.kt
 package com.example.myapplication.ui.cart
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.Entities.*
+import com.example.myapplication.data.Repository.ProductRepository      // NEW
+import dagger.hilt.android.lifecycle.HiltViewModel                     // إذا كنتي مستعملة Hilt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.example.myapplication.data.Entities.*
+import kotlinx.coroutines.launch
+import javax.inject.Inject                                             // NEW
 
-class CartViewModel : ViewModel() {
+@HiltViewModel                                                        // NEW (أزِلها إذا ما كتستعملش Hilt)
+class CartViewModel @Inject constructor(                              // NEW: حقن الـ repo
+    private val repo: ProductRepository
+) : ViewModel() {
+
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
     val items: StateFlow<List<CartItem>> = _items
 
+    /* --------------------------- ADD --------------------------- */
     fun addToCart(product: Product, selected: List<Pair<Addon, Int>>): Boolean {
-        val stock = product.quantity.toIntOrNull() ?: Int.MAX_VALUE
+        if (!repo.decrementStock(product.id, 1)) return false          // NEW
+
         val list = _items.value.toMutableList()
         val current = list.find { it.product.id == product.id }
 
-        if (current != null) {
-            if (current.quantity + 1 > stock) return false
-            current.quantity += 1
-        } else {
-            if (stock < 1) return false
-            list += CartItem(product)
-        }
+        if (current == null) list += CartItem(product)
+        else current.quantity += 1
 
         val target = current ?: list.last()
         selected.forEach { (addon, q) ->
@@ -35,20 +42,18 @@ class CartViewModel : ViewModel() {
         return true
     }
 
+    /* --------------------------- INC --------------------------- */
     fun inc(ci: CartItem): Boolean {
-        val stock = ci.product.quantity.toIntOrNull() ?: Int.MAX_VALUE
-        return if (ci.quantity + 1 > stock) {
-            false
-        } else {
-            ci.quantity++
-            _items.value = _items.value
-            true
-        }
+        if (!repo.decrementStock(ci.product.id, 1)) return false       // NEW
+        ci.quantity++
+        _items.value = _items.value
+        return true
     }
 
     fun dec(ci: CartItem) {
         if (ci.quantity > 1) {
             ci.quantity--
+            repo.incrementStock(ci.product.id, 1)                      // NEW: رجّع ستوك
             _items.value = _items.value
         }
     }
@@ -66,12 +71,14 @@ class CartViewModel : ViewModel() {
     }
 
     fun removeProduct(ci: CartItem) {
+        repo.incrementStock(ci.product.id, ci.quantity)                // NEW: رجّع الكمية كاملة
         val list = _items.value.toMutableList()
         list.remove(ci)
         _items.value = list
     }
 
     fun clearCart() {
+        _items.value.forEach { repo.incrementStock(it.product.id, it.quantity) } // NEW
         _items.value = emptyList()
     }
 }

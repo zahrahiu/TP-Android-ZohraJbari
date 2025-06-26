@@ -9,7 +9,7 @@
         android:fullBackupContent="@xml/backup_rules"
 
         android:label="زهراء"
-        android:icon="@drawable/logo2"
+        android:icon="@drawable/flora"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
@@ -17,7 +17,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="Zahrae"
+            android:label="Flora"
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

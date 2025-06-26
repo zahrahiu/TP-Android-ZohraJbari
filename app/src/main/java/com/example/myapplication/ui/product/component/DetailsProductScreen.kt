@@ -22,10 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.Entities.Addon
 import com.example.myapplication.data.Entities.Product
+import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.product.screens.LanguageManager
 import kotlinx.coroutines.delay
@@ -69,6 +71,7 @@ fun DetailsScreen(
     val snackHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+
     val oldPrice = product.price.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
     val newPrice = product.discountPercent?.let { oldPrice * (100 - it) / 100 }
 
@@ -93,7 +96,7 @@ fun DetailsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        lang.get("home"), // تعريب العنوان مثلا هنا أو تكتب "Détails Produit" مع تعريب في LanguageManager إذا بغيت
+                        lang.get("home"),
                         color = colors.primary,
                         fontWeight = FontWeight.Bold
                     )
@@ -215,10 +218,39 @@ fun DetailsScreen(
                             )
                         }
                     }
+                    val productsState by viewModel.state.collectAsState()
+
+                    val currentProduct = productsState.products.firstOrNull { it.id == product.id } ?: product
+
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(lang.get("quantity") ?: "Quantité : ", color = colors.onSurface, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                        Text(product.quantity, color = colors.onSurface, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                        Text(
+                            lang.get("quantity"),
+                            color = colors.onSurface,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .border(
+                                    width = 2.dp,
+                                    color = if (currentProduct.quantity < 10) Color.Red else Color.Green,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = currentProduct.quantity.toString(),
+                                color = Color.Black,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
+
+
+
 
                     ProductRatingSection(product = product, onRate = {
                         viewModel.updateProductRating(product.id, it)
@@ -285,22 +317,21 @@ fun DetailsScreen(
         }
     }
 
+
     AddOnsBottomSheet(
         open = showSheet,
         onDismiss = { showSheet = false },
-        onValidate = { selected ->
-            val ok = onAddToCart(selected)
+        onValidate = { addons ->
+                   val ok = onAddToCart(addons)                      // ✅ استعمل الكولباك
             if (!ok) {
-                scope.launch {
-                    snackHost.showSnackbar(lang.get("stock_insufficient") ?: "Stock insuffisant")
-                }
+                scope.launch { snackHost.showSnackbar(lang.get("stock_insufficient")) }
             } else {
-                showSheet = false
+                showSheet = false                              // غلق الشيت
             }
-
         },
-                lang = lang
+        lang = lang
     )
+
 
 
 }
