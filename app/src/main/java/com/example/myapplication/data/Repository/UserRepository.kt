@@ -33,7 +33,7 @@ object UserRepository {
             prenom = "Admin",
             telephone = "0000000000",
             isAdmin = true,
-            status = UserStatus.ACCEPTED // تلقائياً مقبول
+            status = UserStatus.ACCEPTED
         )
     )
 

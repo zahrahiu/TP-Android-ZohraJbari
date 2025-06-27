@@ -18,6 +18,9 @@ class AdminViewModel @Inject constructor() : ViewModel() {
     var accepted = mutableStateListOf<User>()
         private set
 
+    var refused  = mutableStateListOf<User>()
+        private set
+
     init { refresh() }
 
     /** Recharge les listes depuis le dépôt */

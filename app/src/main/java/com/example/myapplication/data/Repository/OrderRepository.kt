@@ -9,10 +9,14 @@ enum class OrderStatus { PENDING, CONFIRMED, REFUSED }
 data class Order(
     val id: String = UUID.randomUUID().toString(),
     val userEmail: String,
+
     val clientName: String,
     val phone: String,
     val address: String,
-    val itemsJson: String,        // ⇠ tu peux serialiser ta liste CartItemUi en JSON
+    val itemsJson: String,
+    val shippingMethod: String,
+    val shippingFee: Double,
+    // ⇠ tu peux serialiser ta liste CartItemUi en JSON
     var status: OrderStatus = OrderStatus.PENDING
 )
 

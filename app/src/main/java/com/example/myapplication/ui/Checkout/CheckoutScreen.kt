@@ -1,15 +1,18 @@
 package com.example.myapplication.ui.checkout
 
 /* ─────────── Imports Android / Compose ─────────── */
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,31 +37,57 @@ import com.google.gson.Gson
 
 /* ─────────── Couleurs réutilisées ─────────── */
 private val RougeFlora = Color(0xFFDC4C3E)
+private val LightRed = Color(0xFFF8E8E8)
+private val SuccessGreen = Color(0xFF4CAF50)
 
-/* ═══════════════════════════════════════════════ */
+data class ShippingMethod(
+    val id: String,
+    val name: String,
+    val iconRes: Int,
+    val fee: Double
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     viewModel: CartViewModel = viewModel(),
-    onBack:   () -> Unit,
-    lang:     LanguageManager.Instance,
+    onBack: () -> Unit,
+    lang: LanguageManager.Instance,
     currentOrder: Order? = null,
-    onPay    : (orderId: String) -> Unit
+    onPay: (orderId: String) -> Unit
 ) {
     /* ---------- États ---------- */
-    val colors   = MaterialTheme.colorScheme
+    val colors = MaterialTheme.colorScheme
     val cartItems = viewModel.items.collectAsState().value
-    val scope    = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
-    var name    by remember { mutableStateOf(currentOrder?.clientName ?: "") }
-    var phone   by remember { mutableStateOf(currentOrder?.phone       ?: "") }
-    var address by remember { mutableStateOf(currentOrder?.address     ?: "") }
+    var name by remember { mutableStateOf(currentOrder?.clientName ?: "") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf(currentOrder?.phone ?: "") }
+    var address by remember { mutableStateOf(currentOrder?.address ?: "") }
 
+    // Méthodes d'expédition disponibles
+    val shippingMethods = listOf(
+        ShippingMethod("home", lang.get("home_delivery"), R.drawable.ic_home_delivery, 20.0),
+        ShippingMethod("pickup", lang.get("self_pickup"), R.drawable.ic_pickup, 0.0),
+        ShippingMethod("gift", lang.get("gift_delivery"), R.drawable.ic_gift, 25.0)
+    )
+
+    var selectedShippingMethod by remember { mutableStateOf<ShippingMethod?>(null) }
+    var paymentMethod by remember { mutableStateOf("card") }
+    var cardNumber by remember { mutableStateOf("") }
+    var cardExpiry by remember { mutableStateOf("") }
+    var cardCvv by remember { mutableStateOf("") }
     var orderSuccess by remember { mutableStateOf(false) }
 
-    val payEnabled = name.isNotBlank() && phone.isNotBlank() &&
-            address.isNotBlank() && !orderSuccess
+    val payEnabled = when (selectedShippingMethod?.id) {
+        "pickup" -> name.isNotBlank() && phone.isNotBlank() && !orderSuccess &&
+                (paymentMethod == "paypal" ||
+                        (paymentMethod == "card" && cardNumber.isNotBlank() && cardExpiry.isNotBlank() && cardCvv.isNotBlank()))
+        else -> name.isNotBlank() && phone.isNotBlank() && address.isNotBlank() && !orderSuccess &&
+                (paymentMethod == "paypal" ||
+                        (paymentMethod == "card" && cardNumber.isNotBlank() && cardExpiry.isNotBlank() && cardCvv.isNotBlank()))
+    }
 
     Scaffold(
         topBar = {
@@ -74,7 +103,6 @@ fun CheckoutScreen(
         },
         containerColor = colors.background
     ) { pad ->
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,138 +111,344 @@ fun CheckoutScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            /* --- Infos client --- */
-            item { SectionTitle(lang.get("your_information")) }
+            // Section Méthode d'expédition
+            item { SectionTitle(lang.get("shipping_method")) }
             item {
-                UserFields(
-                    name = name, email = "",
-                    phone = phone, address = address,
+                ShippingMethodsGrid(
+                    methods = shippingMethods,
+                    selectedMethod = selectedShippingMethod,
+                    onMethodSelected = { selectedShippingMethod = it },
                     lang = lang
-                ) { n, _, p, a -> name = n; phone = p; address = a }
-            }
-
-            /* --- Récapitulatif --- */
-            item { SectionTitle(lang.get("your_order")) }
-            items(cartItems) { ci -> CartItemCard(ci, colors, lang) }
-
-            /* --- Total --- */
-            item {
-                val subTotal = cartItems.sumOf { ci ->
-                    val base = parsePrice(ci.product.price).toDouble()
-                    val price = calculateDiscountedPrice(base, ci.product.discountPercent)
-                    price * ci.quantity + ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
-                }
-                val delivery = 20.0
-                TotalPriceCard(
-                    totalWithoutDelivery = subTotal,
-                    deliveryFee          = delivery,
-                    totalWithDelivery    = subTotal + delivery,
-                    colors = colors, lang = lang
                 )
             }
 
-            if (orderSuccess) {
+            // Section Informations client (conditionnelle)
+            if (selectedShippingMethod != null) {
+                item { SectionTitle(lang.get("your_information")) }
                 item {
-                    Text(
-                        "Commande réussie ! Merci pour votre achat.",
-                        color = Color(0xFF4CAF50),
-                        modifier = Modifier.padding(12.dp),
-                        fontWeight = FontWeight.Bold
+                    when (selectedShippingMethod?.id) {
+                        "pickup" -> SelfPickupFields(
+                            name = name,
+                            email = email,
+                            phone = phone,
+                            lang = lang
+                        ) { n, e, p -> name = n; email = e; phone = p }
+                        else -> UserFields(
+                            name = name,
+                            email = email,
+                            phone = phone,
+                            address = address,
+                            lang = lang
+                        ) { n, e, p, a -> name = n; email = e; phone = p; address = a }
+                    }
+                }
+            }
+
+            // Section Méthode de paiement
+            if (selectedShippingMethod != null) {
+                item { SectionTitle(lang.get("payment_method")) }
+                item {
+                    PaymentMethodSelector(
+                        paymentMethod = paymentMethod,
+                        onPaymentMethodChange = { paymentMethod = it },
+                        lang = lang
+                    )
+                }
+
+                if (paymentMethod == "card") {
+                    item {
+                        CardFields(
+                            cardNumber = cardNumber,
+                            cardExpiry = cardExpiry,
+                            cardCvv = cardCvv,
+                            onChange = { num, exp, cvv ->
+                                cardNumber = num
+                                cardExpiry = exp
+                                cardCvv = cvv
+                            },
+                            lang = lang
+                        )
+                    }
+                }
+            }
+
+            // Section Commande
+            item { SectionTitle(lang.get("your_order")) }
+            items(cartItems) { ci -> CartItemCard(ci, colors, lang) }
+
+            // Section Total
+            if (selectedShippingMethod != null) {
+                item {
+                    TotalPriceCard(
+                        totalWithoutDelivery = cartItems.sumOf { ci ->
+                            val base = parsePrice(ci.product.price).toDouble()
+                            val price = calculateDiscountedPrice(base, ci.product.discountPercent)
+                            price * ci.quantity + ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
+                        },
+                        deliveryFee = selectedShippingMethod?.fee ?: 0.0,
+                        totalWithDelivery = cartItems.sumOf { ci ->
+                            val base = parsePrice(ci.product.price).toDouble()
+                            val price = calculateDiscountedPrice(base, ci.product.discountPercent)
+                            price * ci.quantity + ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
+                        } + (selectedShippingMethod?.fee ?: 0.0),
+                        colors = colors,
+                        lang = lang
                     )
                 }
             }
 
-            item {
-                PayButton(
-                    enabled = payEnabled,
-                    onClick = {
-                        scope.launch {
-                            val email = SessionManager.currentUser.value?.email ?: ""
+            // Bouton de paiement
+            if (selectedShippingMethod != null && !orderSuccess) {
+                item {
+                    PayButton(
+                        enabled = payEnabled,
+                        onClick = {
+                            scope.launch {
+                                val email = SessionManager.currentUser.value?.email ?: ""
 
-                            /* ----- on prépare la liste OrderItemDto ----- */
-                            val dtoList = cartItems.map { ci ->
-                                OrderItemDto(
-                                    productName = ci.product.name,
-                                    image       = ci.product.image,
-                                    unitPrice   = parsePrice(ci.product.price).toDouble(),
-                                    discountPct = ci.product.discountPercent,
-                                    quantity    = ci.quantity,
-                                    addons      = ci.addons.map {
-                                        AddonDto(it.addon.name,
-                                            it.addon.price.toDouble(),
-                                            it.quantity)
-                                    }
+                                val dtoList = cartItems.map { ci ->
+                                    OrderItemDto(
+                                        productName = ci.product.name,
+                                        image = ci.product.image,
+                                        unitPrice = parsePrice(ci.product.price).toDouble(),
+                                        discountPct = ci.product.discountPercent,
+                                        quantity = ci.quantity,
+                                        addons = ci.addons.map {
+                                            AddonDto(
+                                                it.addon.name,
+                                                it.addon.price.toDouble(),
+                                                it.quantity
+                                            )
+                                        }
+                                    )
+                                }
+
+                                val order = Order(
+                                    userEmail = email,
+                                    clientName = name,
+                                    phone = phone,
+
+                                    address = if (selectedShippingMethod?.id == "pickup") "" else address,
+                                    itemsJson = Gson().toJson(dtoList),
+                                    shippingMethod = selectedShippingMethod?.name ?: "",
+                                    shippingFee = selectedShippingMethod?.fee ?: 0.0
                                 )
+                                OrderRepository.create(order)
+
+                                UserRepository.getUser(email)?.notifications?.add(
+                                    Notification(
+                                        message = "Votre commande est en attente de confirmation.",
+                                        orderId = order.id
+                                    )
+                                )
+
+                                viewModel.clearCart()
+                                orderSuccess = true
+                                onPay(order.id)
                             }
+                        },
+                        colors = colors,
+                        lang = lang
+                    )
+                }
+            }
 
-                            /* ----- on crée la commande ----- */
-                            val order = Order(
-                                userEmail  = email,
-                                clientName = name,
-                                phone      = phone,
-                                address    = address,
-                                itemsJson  = Gson().toJson(dtoList)
-                            )
-                            OrderRepository.create(order)
+            if (orderSuccess) {
+                item {
+                    OrderSuccessMessage()
+                }
+            }
+        }
+    }
+}
 
-                            /* ----- notification ----- */
-                            UserRepository.getUser(email)?.notifications?.add(
-                                Notification(
-                                    message = "Votre commande est en attente de confirmation.",
-                                    orderId = order.id
-                                )
-                            )
+@Composable
+private fun ShippingMethodsGrid(
+    methods: List<ShippingMethod>,
+    selectedMethod: ShippingMethod?,
+    onMethodSelected: (ShippingMethod) -> Unit,
+    lang: LanguageManager.Instance
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        methods.forEach { method ->
+            ShippingMethodCard(
+                method = method,
+                isSelected = selectedMethod?.id == method.id,
+                onSelect = { onMethodSelected(method) },
+                lang = lang
+            )
+        }
+    }
+}
 
-                            viewModel.clearCart()
-                            orderSuccess = true
+@Composable
+private fun ShippingMethodCard(
+    method: ShippingMethod,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    lang: LanguageManager.Instance
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) LightRed else Color.White
+        ),
+        border = if (isSelected) BorderStroke(1.dp, RougeFlora) else null
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(method.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
 
-                            /* 👉 on retourne l'id de la nouvelle commande */
-                            onPay(order.id)
-                        }
-                    },
-                    colors = colors,
-                    lang   = lang
+            Spacer(Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    method.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+
+                if (method.fee > 0) {
+                    Text(
+                        "${lang.get("delivery_fee")}: ${method.fee} ${lang.get("currency")}",
+                        fontSize = 14.sp
+                    )
+                } else {
+                    Text(
+                        lang.get("free_delivery"),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            if (isSelected) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = RougeFlora
                 )
             }
         }
     }
 }
 
-/* ─────────── Helpers (استعمل كودك الأصلي) ─────────── */
+@Composable
+private fun PaymentMethodSelector(
+    paymentMethod: String,
+    onPaymentMethodChange: (String) -> Unit,
+    lang: LanguageManager.Instance
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        PaymentMethodCard(
+            id = "card",
+            name = lang.get("credit_card"),
+            iconRes = R.drawable.ic_credit_card,
+            isSelected = paymentMethod == "card",
+            onSelect = { onPaymentMethodChange("card") }
+        )
+
+        PaymentMethodCard(
+            id = "paypal",
+            name = "PayPal",
+            iconRes = R.drawable.ic_paypal,
+            isSelected = paymentMethod == "paypal",
+            onSelect = { onPaymentMethodChange("paypal") }
+        )
+    }
+}
+
+@Composable
+private fun PaymentMethodCard(
+    id: String,
+    name: String,
+    iconRes: Int,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) LightRed else Color.White
+        ),
+        border = if (isSelected) BorderStroke(1.dp, RougeFlora) else null
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
+
+            Spacer(Modifier.width(16.dp))
+
+            Text(
+                name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (isSelected) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = RougeFlora
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OrderSuccessMessage() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Icon(
+            Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = SuccessGreen,
+            modifier = Modifier.size(64.dp)
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            "Commande réussie !",
+            color = SuccessGreen,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            "Merci pour votre achat.",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
 
 private fun parsePrice(priceStr: String): Float =
     priceStr.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
 
 private fun calculateDiscountedPrice(price: Double, discountPercent: Int?): Double =
     discountPercent?.let { price * (100 - it) / 100 } ?: price
-
-/* =========== بقية الـ composables كما هي: SectionTitle, UserFields, CartItemCard, … =========== */
-
-
-// Composable components
-@Composable
-private fun DeliveryMethodSection(
-    selfPickup: Boolean,
-    onSelfPickupChange: (Boolean) -> Unit,
-    lang: LanguageManager.Instance
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(lang.get("self_pickup"), fontWeight = FontWeight.SemiBold)
-        Switch(
-            checked = selfPickup,
-            onCheckedChange = onSelfPickupChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = RougeFlora,
-                checkedTrackColor = RougeFlora.copy(alpha = 0.5f)
-            )
-        )
-    }
-}
 
 @Composable
 private fun SectionTitle(title: String) {
@@ -224,31 +458,6 @@ private fun SectionTitle(title: String) {
         fontSize = 16.sp,
         modifier = Modifier.padding(vertical = 8.dp)
     )
-}
-
-@Composable
-private fun SectionCollapsible(
-    title: String,
-    expanded: Boolean,
-    onToggle: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(onClick = onToggle) {
-            Icon(
-                imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = null,
-                tint = RougeFlora
-            )
-        }
-    }
 }
 
 @Composable
@@ -301,28 +510,6 @@ private fun UserFields(
                 unfocusedContainerColor = Color.White
             )
         )
-    }
-}
-
-@Composable
-private fun PaymentMethodSelector(
-    paymentMethod: String,
-    onPaymentMethodChange: (String) -> Unit,
-    lang: LanguageManager.Instance
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(
-            selected = paymentMethod == "card",
-            onClick = { onPaymentMethodChange("card") },
-            colors = RadioButtonDefaults.colors(selectedColor = RougeFlora)
-        )
-        Text(lang.get("card"), Modifier.padding(end = 16.dp))
-        RadioButton(
-            selected = paymentMethod == "paypal",
-            onClick = { onPaymentMethodChange("paypal") },
-            colors = RadioButtonDefaults.colors(selectedColor = RougeFlora)
-        )
-        Text("paypal")
     }
 }
 
@@ -535,6 +722,48 @@ private fun PayButton(
         )
     ) {
         Text(lang.get("pay"), fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun SelfPickupFields(
+    name: String,
+    email: String,
+    phone: String,
+    lang: LanguageManager.Instance,
+    onChange: (String, String, String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { onChange(it, email, phone) },
+            label = { Text(lang.get("full_name")) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            )
+        )
+        OutlinedTextField(
+            value = email,
+            onValueChange = { onChange(name, it, phone) },
+            label = { Text(lang.get("email")) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            )
+        )
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { onChange(name, email, it) },
+            label = { Text(lang.get("phone")) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            )
+        )
     }
 }
 

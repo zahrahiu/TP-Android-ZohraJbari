@@ -46,6 +46,8 @@ fun HomeScreen(
     currentRoute: String = Routes.Home,
     onLogout: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    showAdminButton: Boolean = false,
+    onAdminButtonClick: () -> Unit = {}
 ) {
     /* ─── language & theme ─────────────────────────────────────────────── */
     val themeState = LocalThemeState.current
@@ -135,6 +137,16 @@ fun HomeScreen(
                             expanded = mainMenuExpanded,
                             onDismissRequest = { mainMenuExpanded = false }
                         ) {
+                            if (showAdminButton) {
+                                DropdownMenuItem(
+                                    text = { Text("Panneau admin") },
+                                    onClick = {
+                                        mainMenuExpanded = false
+                                        onAdminButtonClick()
+                                    }
+                                )
+                                Divider()
+                            }
                             DropdownMenuItem(
                                 text = { Text("Language") },
                                 trailingIcon = {

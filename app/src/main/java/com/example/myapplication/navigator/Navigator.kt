@@ -1,6 +1,7 @@
+//  AppNavigation.kt
 package com.example.myapplication.navigator
 
-/* ───────────── Imports Android / Compose ───────────── */
+/* ─── Android / Compose ─── */
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -10,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
-/* ───────────── Imports مشروعك ───────────── */
+/* ─── Projet ─── */
 import com.example.myapplication.data.Repository.Notification
 import com.example.myapplication.data.Repository.Order
 import com.example.myapplication.data.Repository.OrderRepository
@@ -20,7 +21,6 @@ import com.example.myapplication.ui.Admin.AdminScreen
 import com.example.myapplication.ui.Notification.NotificationScreen
 import com.example.myapplication.ui.User.LoginScreen
 import com.example.myapplication.ui.User.RegisterScreen
-import com.example.myapplication.ui.cart.CartItemUi
 import com.example.myapplication.ui.cart.CartScreen
 import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.checkout.CheckoutScreen
@@ -30,7 +30,7 @@ import com.example.myapplication.ui.product.component.DetailsScreen
 import com.example.myapplication.ui.product.screens.*
 import com.google.gson.Gson
 
-/* ══════════ ثوابت المسارات ══════════ */
+/* ══════════════ ROUTES ══════════════ */
 object Routes {
     const val Login             = "login"
     const val Register          = "register"
@@ -41,33 +41,40 @@ object Routes {
     const val CategorySelection = "category_selection"
     const val CategoryProducts  = "category_products"
     const val Checkout          = "checkout"
-    const val OrderSummaryById  = "order_summary"        // ← يعرض الطلب بـ id
+    const val OrderSummaryById  = "order_summary"
     const val Notify            = "notifications"
+    const val AdminPanel        = "admin_panel"
 }
 
-/* ══════════ Navigator الرئيسي ══════════ */
+/* ══════════════ NAVIGATION ══════════════ */
 @Composable
-fun AppNavigation(viewModel: ProductViewModel) {
+fun AppNavigation(productVM: ProductViewModel) {
 
-    val nav      = rememberNavController()
+    val nav       = rememberNavController()
     val cartVM: CartViewModel = hiltViewModel()
-    val lang     = LanguageManager.rememberLanguage()
+    val lang      = LanguageManager.rememberLanguage()
 
     val currentUserEmail = SessionManager.currentUser.value?.email ?: ""
     val currentOrder     = OrderRepository.forUser(currentUserEmail).lastOrNull()
 
     NavHost(navController = nav, startDestination = Routes.Login) {
 
-        /* ---------- Login / Register ---------- */
+        /* ----------- Authentification ----------- */
         composable(Routes.Login) {
             LoginScreen(
-                onUserLogin  = { nav.navigate(Routes.Home)  { popUpTo(Routes.Login){inclusive = true} } },
-                onAdminLogin = { nav.navigate("admin")      { popUpTo(Routes.Login){inclusive = true} } },
+                onUserLogin = {
+                    nav.navigate(Routes.Home) {
+                        popUpTo(Routes.Login) { inclusive = true }
+                    }
+                },
+                onAdminLogin = {
+                    nav.navigate(Routes.Home) {
+                        popUpTo(Routes.Login) { inclusive = true }
+                    }
+                },
                 onNavigateToRegister = { nav.navigate(Routes.Register) }
             )
         }
-
-        composable("admin") { AdminScreen(navController = nav) }
 
         composable(Routes.Register) {
             RegisterScreen(
@@ -76,134 +83,147 @@ fun AppNavigation(viewModel: ProductViewModel) {
             )
         }
 
-        /* ---------- Home ---------- */
+        /* ----------- Panneau d’administration ----------- */
+        composable(Routes.AdminPanel) {
+            AdminScreen(navController = nav)
+        }
+
+        /* ----------- Home ----------- */
         composable(Routes.Home) {
             HomeScreen(
-                viewModel = viewModel,
-                lang      = lang,
-                onNavigateToDetails  = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
-                onNavigateToFavorites= { nav.navigate(Routes.Favorites) },
-                onNavigateToCart     = { nav.navigate(Routes.Cart) },
-                onNavigateToCategory = { nav.navigate(Routes.CategorySelection) },
-                currentRoute         = Routes.Home,
-                onLogout             = {
-                    nav.navigate(Routes.Login) { popUpTo(Routes.Home){inclusive = true} }
+                viewModel                  = productVM,
+                lang                       = lang,
+                onNavigateToDetails        = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
+                onNavigateToFavorites      = { nav.navigate(Routes.Favorites) },
+                onNavigateToCart           = { nav.navigate(Routes.Cart) },
+                onNavigateToCategory       = { nav.navigate(Routes.CategorySelection) },
+                currentRoute               = Routes.Home,
+                onLogout                   = {
+                    nav.navigate(Routes.Login) { popUpTo(Routes.Home) { inclusive = true } }
                 },
-                onNavigateToNotifications = { nav.navigate(Routes.Notify) }
+                onNavigateToNotifications  = { nav.navigate(Routes.Notify) },
+                showAdminButton            = SessionManager.currentUser.value?.isAdmin == true,
+                onAdminButtonClick         = { nav.navigate(Routes.AdminPanel) }
             )
         }
 
-        /* ---------- Favorites ---------- */
+        /* ----------- Favoris ----------- */
         composable(Routes.Favorites) {
             FavoritesScreen(
-                viewModel         = viewModel,
-                lang              = lang,
-                onNavigateToDetails= { id -> nav.navigate("${Routes.ProductDetail}/$id") },
-                onNavigateHome    = { nav.navigate(Routes.Home) },
-                onNavigateFavorites= { /* stay */ },
-                onNavigateCart    = { nav.navigate(Routes.Cart) },
-                onNavigateCategory= { nav.navigate(Routes.CategorySelection) }
+                viewModel              = productVM,
+                lang                   = lang,
+                onNavigateToDetails    = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
+                onNavigateHome         = { nav.navigate(Routes.Home) },
+                onNavigateFavorites    = { /* déjà ici */ },
+                onNavigateCart         = { nav.navigate(Routes.Cart) },
+                onNavigateCategory     = { nav.navigate(Routes.CategorySelection) }
             )
         }
 
-        /* ---------- Product Detail ---------- */
+        /* ----------- Détail produit ----------- */
         composable(
-            route = "${Routes.ProductDetail}/{id}",
-            arguments = listOf(navArgument("id"){ type = NavType.StringType })
+            "${Routes.ProductDetail}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { back ->
             val id = back.arguments?.getString("id") ?: return@composable
-            val prod = viewModel.getProductById(id)
-            if (prod == null) Text("Produit introuvable")
-            else DetailsScreen(
-                product       = prod,
-                navController = nav,
-                viewModel     = viewModel,
-                lang          = lang,
-                onAddToCart   = { addons ->
-                    val ok = cartVM.addToCart(prod, addons)
-                    if (ok) nav.navigate(Routes.Cart)
-                    ok
-                }
-            )
+            val prod = productVM.getProductById(id)
+            if (prod == null) {
+                Text("Produit introuvable")
+            } else {
+                DetailsScreen(
+                    product       = prod,
+                    navController = nav,
+                    viewModel     = productVM,
+                    lang          = lang,
+                    onAddToCart   = { addons ->
+                        val ok = cartVM.addToCart(prod, addons)
+                        if (ok) nav.navigate(Routes.Cart)
+                        ok
+                    }
+                )
+            }
         }
 
-        /* ---------- Cart ---------- */
+        /* ----------- Panier ----------- */
         composable(Routes.Cart) {
             CartScreen(
-                viewModel         = cartVM,
-                lang              = lang,
-                onNavigateToHome  = { nav.navigate(Routes.Home) },
-                onNavigateToFavorites= { nav.navigate(Routes.Favorites) },
-                onNavigateToCategory= { nav.navigate(Routes.CategorySelection) },
-                onNavigateToCart  = { /* stay */ },
-                onNavigateToCheckout= { nav.navigate(Routes.Checkout) }
+                viewModel              = cartVM,
+                lang                   = lang,
+                onNavigateToHome       = { nav.navigate(Routes.Home) },
+                onNavigateToFavorites  = { nav.navigate(Routes.Favorites) },
+                onNavigateToCategory   = { nav.navigate(Routes.CategorySelection) },
+                onNavigateToCart       = { /* déjà ici */ },
+                onNavigateToCheckout   = { nav.navigate(Routes.Checkout) }
             )
         }
 
-        /* ---------- Category Selection / Products ---------- */
+        /* ----------- Choix catégorie ----------- */
         composable(Routes.CategorySelection) {
             CategorySelectionScreen(
-                onCategorySelected = { cat -> nav.navigate("${Routes.CategoryProducts}/$cat") },
-                onNavigateHome     = { nav.navigate(Routes.Home) },
-                onNavigateFavorites= { nav.navigate(Routes.Favorites) },
-                onNavigateCart     = { nav.navigate(Routes.Cart) },
-                currentRoute       = Routes.CategorySelection,
-                lang               = lang
+                onCategorySelected     = { cat -> nav.navigate("${Routes.CategoryProducts}/$cat") },
+                onNavigateHome         = { nav.navigate(Routes.Home) },
+                onNavigateFavorites    = { nav.navigate(Routes.Favorites) },
+                onNavigateCart         = { nav.navigate(Routes.Cart) },
+                currentRoute           = Routes.CategorySelection,
+                lang                   = lang
             )
         }
 
+        /* ----------- Produits par catégorie ----------- */
         composable(
-            route = "${Routes.CategoryProducts}/{category}",
-            arguments = listOf(navArgument("category"){ type = NavType.StringType })
+            "${Routes.CategoryProducts}/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
         ) { back ->
             val cat = back.arguments?.getString("category") ?: ""
             CategoryProductsScreen(
-                viewModel          = viewModel,
-                category           = cat,
-                onNavigateToDetails= { id -> nav.navigate("${Routes.ProductDetail}/$id") },
-                onNavigateHome     = { nav.navigate(Routes.Home) },
-                onNavigateFavorites= { nav.navigate(Routes.Favorites) },
-                onNavigateCart     = { nav.navigate(Routes.Cart) },
-                onNavigateCategories= { nav.navigate(Routes.CategorySelection) },
-                currentRoute       = Routes.CategoryProducts,
-                lang               = lang
+                viewModel              = productVM,
+                category               = cat,
+                onNavigateToDetails    = { id -> nav.navigate("${Routes.ProductDetail}/$id") },
+                onNavigateHome         = { nav.navigate(Routes.Home) },
+                onNavigateFavorites    = { nav.navigate(Routes.Favorites) },
+                onNavigateCart         = { nav.navigate(Routes.Cart) },
+                onNavigateCategories   = { nav.navigate(Routes.CategorySelection) },
+                currentRoute           = Routes.CategoryProducts,
+                lang                   = lang
             )
         }
 
-        /* ---------- Notifications ---------- */
+        /* ----------- Notifications ----------- */
         composable(Routes.Notify) {
-            val user = SessionManager.currentUser.value ?: run {
-                nav.popBackStack(); return@composable
-            }
+            val user = SessionManager.currentUser.value ?: return@composable
             NotificationScreen(
-                user         = user,
-                onBack       = { nav.popBackStack() },
-                navController= nav
+                user          = user,
+                onBack        = { nav.popBackStack() },
+                navController = nav
             )
         }
 
-        /* ---------- Checkout ---------- */
+        /* ----------- Checkout ----------- */
         composable(Routes.Checkout) {
             CheckoutScreen(
                 viewModel    = cartVM,
                 onBack       = { nav.popBackStack() },
                 lang         = lang,
                 currentOrder = currentOrder,
-                onPay = { orderId ->
-
+                onPay        = { orderId ->
+                    // Ajout d'une notification de suivi pour l'utilisateur
+                    UserRepository.getUser(currentUserEmail)?.notifications?.add(
+                        Notification(
+                            message = "Votre commande est en attente de confirmation.",
+                            orderId = orderId
+                        )
+                    )
                 }
             )
         }
 
-        /* ---------- OrderSummary by ID ---------- */
+        /* ----------- Suivi commande ----------- */
         composable(
-            route = "${Routes.OrderSummaryById}/{id}",
-            arguments = listOf(navArgument("id"){ type = NavType.StringType })
+            "${Routes.OrderSummaryById}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { back ->
-            val id    = back.arguments?.getString("id") ?: return@composable
-            val order = OrderRepository.byId(id)
-
-            if (order == null) {
+            val id = back.arguments?.getString("id") ?: return@composable
+            if (OrderRepository.byId(id) == null) {
                 Text("Commande introuvable")
             } else {
                 OrderSummaryScreen(
