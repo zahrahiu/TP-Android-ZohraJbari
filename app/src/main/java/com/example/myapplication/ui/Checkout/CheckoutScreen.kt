@@ -1,8 +1,8 @@
 package com.example.myapplication.ui.checkout
 
+/* ─────────── Imports Android / Compose ─────────── */
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,67 +21,44 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
+
+/* ─────────── Imports Projet ─────────── */
 import com.example.myapplication.R
+import com.example.myapplication.data.Repository.*
+import com.example.myapplication.session.SessionManager
 import com.example.myapplication.ui.cart.CartItemUi
 import com.example.myapplication.ui.cart.CartViewModel
 import com.example.myapplication.ui.product.screens.LanguageManager
-import kotlinx.coroutines.launch
+import com.google.gson.Gson
 
-val RougeFlora = Color(0xFFDC4C3E)
-val BeigeFlora = Color(0xFFFFF8F0)
-val BeigeBackground = Color(0xFFFFFBF7)
+/* ─────────── Couleurs réutilisées ─────────── */
+private val RougeFlora = Color(0xFFDC4C3E)
+
+/* ═══════════════════════════════════════════════ */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     viewModel: CartViewModel = viewModel(),
-    onBack: () -> Unit,
-    lang: LanguageManager.Instance,
-    onPay: (name: String, phone: String, address: String) -> Unit
+    onBack:   () -> Unit,
+    lang:     LanguageManager.Instance,
+    currentOrder: Order? = null,
+    onPay    : (orderId: String) -> Unit
 ) {
-    val colors = MaterialTheme.colorScheme
-    val items = viewModel.items.collectAsState().value
-    val scope = rememberCoroutineScope()
+    /* ---------- États ---------- */
+    val colors   = MaterialTheme.colorScheme
+    val cartItems = viewModel.items.collectAsState().value
+    val scope    = rememberCoroutineScope()
 
-    // State variables
-    var selfPickup by remember { mutableStateOf(true) }
-    var senderExpanded by remember { mutableStateOf(false) }
-    var recipientExpanded by remember { mutableStateOf(false) }
-    var paymentMethod by remember { mutableStateOf("card") }
+    var name    by remember { mutableStateOf(currentOrder?.clientName ?: "") }
+    var phone   by remember { mutableStateOf(currentOrder?.phone       ?: "") }
+    var address by remember { mutableStateOf(currentOrder?.address     ?: "") }
 
-    // User information
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var comment by remember { mutableStateOf("") }
+    var orderSuccess by remember { mutableStateOf(false) }
 
-    // Sender information
-    var senderName by remember { mutableStateOf("") }
-    var senderEmail by remember { mutableStateOf("") }
-    var senderPhone by remember { mutableStateOf("") }
-
-    // Recipient information
-    var recipientName by remember { mutableStateOf("") }
-    var recipientEmail by remember { mutableStateOf("") }
-    var recipientPhone by remember { mutableStateOf("") }
-
-    // Payment information
-    var cardNumber by remember { mutableStateOf("") }
-    var cardExpiry by remember { mutableStateOf("") }
-    var cardCvv by remember { mutableStateOf("") }
-
-    // Calculate prices
-    val deliveryFee = 20.0
-    val totalWithoutDelivery = remember(items) {
-        items.sumOf { ci ->
-            val originalPrice = parsePrice(ci.product.price).toDouble()
-            val productPrice = calculateDiscountedPrice(originalPrice, ci.product.discountPercent)
-            val addonsPrice = ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
-            productPrice * ci.quantity + addonsPrice
-        }
-    }
-    val totalWithDelivery = totalWithoutDelivery + deliveryFee
+    val payEnabled = name.isNotBlank() && phone.isNotBlank() &&
+            address.isNotBlank() && !orderSuccess
 
     Scaffold(
         topBar = {
@@ -89,181 +66,131 @@ fun CheckoutScreen(
                 title = { Text(lang.get("checkout"), color = colors.primary, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = lang.get("back"))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, lang.get("back"))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colors.background)
             )
         },
         containerColor = colors.background
-    ) { padding ->
+    ) { pad ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(pad)
                 .background(colors.background),
-            contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Delivery Method Section
+
+            /* --- Infos client --- */
+            item { SectionTitle(lang.get("your_information")) }
             item {
-                DeliveryMethodSection(
-                    selfPickup = selfPickup,
-                    onSelfPickupChange = { selfPickup = it },
+                UserFields(
+                    name = name, email = "",
+                    phone = phone, address = address,
                     lang = lang
-                )
+                ) { n, _, p, a -> name = n; phone = p; address = a }
             }
 
-            // User Information Section
-            if (selfPickup) {
-                item { SectionTitle(lang.get("your_information")) }
-                item {
-                    UserFields(
-                        name = name,
-                        email = email,
-                        phone = phone,
-                        address = address,
-                        lang = lang,
-                        onChange = { n, e, p, a ->
-                            name = n; email = e; phone = p; address = a
-                        }
-                    )
-                }
-            } else {
-                // Sender Information
-                item {
-                    SectionCollapsible(
-                        title = lang.get("sender"),
-                        expanded = senderExpanded,
-                        onToggle = { senderExpanded = !senderExpanded }
-                    )
-                }
-                if (senderExpanded) {
-                    item {
-                        UserFields(
-                            name = senderName,
-                            email = senderEmail,
-                            phone = senderPhone,
-                            address = "",
-                            lang = lang,
-                            onChange = { n, e, p, _ ->
-                                senderName = n; senderEmail = e; senderPhone = p
-                            }
-                        )
-                    }
-                }
-
-                // Recipient Information
-                item {
-                    SectionCollapsible(
-                        title = lang.get("recipient"),
-                        expanded = recipientExpanded,
-                        onToggle = { recipientExpanded = !recipientExpanded }
-                    )
-                }
-                if (recipientExpanded) {
-                    item {
-                        UserFields(
-                            name = recipientName,
-                            email = recipientEmail,
-                            phone = recipientPhone,
-                            address = "",
-                            lang = lang,
-                            onChange = { n, e, p, _ ->
-                                recipientName = n; recipientEmail = e; recipientPhone = p
-                            }
-                        )
-                    }
-                }
-
-                // Comment Field
-                item {
-                    OutlinedTextField(
-                        value = comment,
-                        onValueChange = { comment = it },
-                        label = { Text(lang.get("comment")) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
-                        )
-                    )
-                }
-            }
-
-            // Payment Method Section
-            item { SectionTitle(lang.get("payment_method")) }
-            item {
-                PaymentMethodSelector(
-                    paymentMethod = paymentMethod,
-                    onPaymentMethodChange = { paymentMethod = it },
-                    lang = lang
-                )
-            }
-            if (paymentMethod == "card") {
-                item {
-                    CardFields(
-                        cardNumber = cardNumber,
-                        cardExpiry = cardExpiry,
-                        cardCvv = cardCvv,
-                        onChange = { cn, ce, cv ->
-                            cardNumber = cn; cardExpiry = ce; cardCvv = cv
-                        },
-                        lang = lang
-                    )
-                }
-            }
-
-            // Order Summary Section
+            /* --- Récapitulatif --- */
             item { SectionTitle(lang.get("your_order")) }
-            items(items) { cartItem ->
-                CartItemCard(
-                    cartItem = cartItem,
-                    colors = colors,
-                    lang = lang
-                )
-            }
+            items(cartItems) { ci -> CartItemCard(ci, colors, lang) }
 
-            // Total Price Section
+            /* --- Total --- */
             item {
+                val subTotal = cartItems.sumOf { ci ->
+                    val base = parsePrice(ci.product.price).toDouble()
+                    val price = calculateDiscountedPrice(base, ci.product.discountPercent)
+                    price * ci.quantity + ci.addons.sumOf { it.addon.price.toDouble() * it.quantity }
+                }
+                val delivery = 20.0
                 TotalPriceCard(
-                    totalWithoutDelivery = totalWithoutDelivery,
-                    deliveryFee = deliveryFee,
-                    totalWithDelivery = totalWithDelivery,
-                    colors = colors,
-                    lang = lang
+                    totalWithoutDelivery = subTotal,
+                    deliveryFee          = delivery,
+                    totalWithDelivery    = subTotal + delivery,
+                    colors = colors, lang = lang
                 )
             }
 
-            // Pay Button
+            if (orderSuccess) {
+                item {
+                    Text(
+                        "Commande réussie ! Merci pour votre achat.",
+                        color = Color(0xFF4CAF50),
+                        modifier = Modifier.padding(12.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             item {
                 PayButton(
-                    enabled = name.isNotBlank() && phone.isNotBlank() && address.isNotBlank(),
+                    enabled = payEnabled,
                     onClick = {
                         scope.launch {
-                            onPay(name, phone, address)
+                            val email = SessionManager.currentUser.value?.email ?: ""
+
+                            /* ----- on prépare la liste OrderItemDto ----- */
+                            val dtoList = cartItems.map { ci ->
+                                OrderItemDto(
+                                    productName = ci.product.name,
+                                    image       = ci.product.image,
+                                    unitPrice   = parsePrice(ci.product.price).toDouble(),
+                                    discountPct = ci.product.discountPercent,
+                                    quantity    = ci.quantity,
+                                    addons      = ci.addons.map {
+                                        AddonDto(it.addon.name,
+                                            it.addon.price.toDouble(),
+                                            it.quantity)
+                                    }
+                                )
+                            }
+
+                            /* ----- on crée la commande ----- */
+                            val order = Order(
+                                userEmail  = email,
+                                clientName = name,
+                                phone      = phone,
+                                address    = address,
+                                itemsJson  = Gson().toJson(dtoList)
+                            )
+                            OrderRepository.create(order)
+
+                            /* ----- notification ----- */
+                            UserRepository.getUser(email)?.notifications?.add(
+                                Notification(
+                                    message = "Votre commande est en attente de confirmation.",
+                                    orderId = order.id
+                                )
+                            )
+
+                            viewModel.clearCart()
+                            orderSuccess = true
+
+                            /* 👉 on retourne l'id de la nouvelle commande */
+                            onPay(order.id)
                         }
                     },
                     colors = colors,
-                    lang = lang
+                    lang   = lang
                 )
             }
         }
     }
 }
 
-// Helper functions
-private fun parsePrice(priceStr: String): Float {
-    return priceStr.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
-}
+/* ─────────── Helpers (استعمل كودك الأصلي) ─────────── */
 
-private fun calculateDiscountedPrice(price: Double, discountPercent: Int?): Double {
-    return if (discountPercent != null) {
-        price * (100 - discountPercent) / 100
-    } else {
-        price
-    }
-}
+private fun parsePrice(priceStr: String): Float =
+    priceStr.replace(Regex("[^\\d.]"), "").toFloatOrNull() ?: 0f
+
+private fun calculateDiscountedPrice(price: Double, discountPercent: Int?): Double =
+    discountPercent?.let { price * (100 - it) / 100 } ?: price
+
+/* =========== بقية الـ composables كما هي: SectionTitle, UserFields, CartItemCard, … =========== */
+
 
 // Composable components
 @Composable

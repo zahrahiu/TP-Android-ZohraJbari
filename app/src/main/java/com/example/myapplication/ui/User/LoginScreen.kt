@@ -1,3 +1,4 @@
+// LoginScreen.kt
 package com.example.myapplication.ui.User
 
 import androidx.compose.foundation.Image
@@ -16,13 +17,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.data.Repository.UserRepository
+import com.example.myapplication.data.Repository.UserStatus
+import com.example.myapplication.session.SessionManager
 
 val RougeFlora = Color(0xFF989D71)
 val BeigeFlora = Color(0xFFFFF8F0)
 val BeigeBackground = Color(0xFFFFFFFF)
 
 @Composable
-fun LoginScreen(onUserLogin: () -> Unit,onAdminLogin: () -> Unit, onNavigateToRegister: () -> Unit) {
+fun LoginScreen(
+    onUserLogin: () -> Unit,
+    onAdminLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMsg by remember { mutableStateOf("") }
@@ -64,8 +71,7 @@ fun LoginScreen(onUserLogin: () -> Unit,onAdminLogin: () -> Unit, onNavigateToRe
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp),
+                modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -110,10 +116,16 @@ fun LoginScreen(onUserLogin: () -> Unit,onAdminLogin: () -> Unit, onNavigateToRe
                 Button(
                     onClick = {
                         val user = UserRepository.login(email, password)
-                        if (user != null) {
-                            if (user.isAdmin) onAdminLogin() else onUserLogin()
-                        } else {
+                        if (user == null) {
+                            // بيانات خاطئة
                             errorMsg = "Email ou mot de passe incorrect"
+                        } else if (user.status == UserStatus.REFUSED) {
+                            // المستخدم مرفوض من قبل الادارة
+                            errorMsg = "Votre compte a été refusé par l’administration."
+                        } else {
+                            // حالة مقبولة (مسموح له الدخول)
+                            SessionManager.currentUser.value = user
+                            if (user.isAdmin) onAdminLogin() else onUserLogin()
                         }
                     },
                     modifier = Modifier
@@ -124,6 +136,7 @@ fun LoginScreen(onUserLogin: () -> Unit,onAdminLogin: () -> Unit, onNavigateToRe
                 ) {
                     Text("Se connecter", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
+
 
                 if (errorMsg.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))

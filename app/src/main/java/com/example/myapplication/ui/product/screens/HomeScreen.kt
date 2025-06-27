@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +23,11 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.data.Repository.UserRepository.User
 import com.example.myapplication.navigator.Routes
+import com.example.myapplication.session.SessionManager
 import com.example.myapplication.ui.product.ProductViewModel
+import com.example.myapplication.ui.product.component.NotificationBell
 import com.example.myapplication.ui.product.component.ProductsList
 import com.example.myapplication.ui.product.component.QuickFilter
 import com.example.myapplication.ui.theme.LocalThemeState
@@ -40,7 +44,8 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     onNavigateToCategory: () -> Unit,
     currentRoute: String = Routes.Home,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
 ) {
     /* ─── language & theme ─────────────────────────────────────────────── */
     val themeState = LocalThemeState.current
@@ -117,12 +122,15 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 actions = {
+                    val user = SessionManager.currentUser.value
+                    if (user != null) {
+                        NotificationBell(user) { onNavigateToNotifications() }
+                    }
                     Box {
                         IconButton(onClick = { mainMenuExpanded = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = null)
                         }
 
-                        /* ── MAIN MENU ── */
                         DropdownMenu(
                             expanded = mainMenuExpanded,
                             onDismissRequest = { mainMenuExpanded = false }
@@ -471,5 +479,6 @@ fun HomeScreen(
         }
     }
 }
+
 
 
