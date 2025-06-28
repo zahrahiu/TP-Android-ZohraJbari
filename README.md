@@ -60,4 +60,6 @@ git clone https://github.com/zahrahiu/TP-Android-ZohraJbari.git
 3-Lance l’application sur un émulateur ou appareil Android.  
 
 ## Réalisation de l’application
+### Logo de l'application
+![image](https://github.com/user-attachments/assets/a891aa1c-5276-4eb3-8c4e-5c17636a89fd)
 
