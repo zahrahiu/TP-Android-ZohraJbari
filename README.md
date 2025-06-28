@@ -50,4 +50,14 @@ implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
 ```
 
+## Lancement
+1- Clone le projet :
+```
+git clone https://github.com/zahrahiu/TP-Android-ZohraJbari.git
+```
+2- Ouvre-le dans Android Studio.  
+
+3-Lance l’application sur un émulateur ou appareil Android.  
+
+## Réalisation de l’application
 
