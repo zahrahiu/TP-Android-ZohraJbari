@@ -1,11 +1,23 @@
-# Application mobile "Zahrae"
-# Logo et nom de l'application
-![image](https://github.com/user-attachments/assets/fd8207a3-f120-4300-bf6b-9ecbdcd153fd)
-# page Home 
-![image](https://github.com/user-attachments/assets/06f75137-6af5-4cdf-a9c6-c53b906f3426)
+# 🌸 Flora Boutique – Application Mobile de Vente de Fleurs
 
-# détails des produits
-![image](https://github.com/user-attachments/assets/34f514b7-408f-4f84-8ef4-ceb4a2ba2b95)
+##  Description
+**Flora Boutique** est une application mobile développée dans le cadre d’un projet académique. Elle permet aux utilisateurs de consulter et d’acheter des fleurs en ligne à travers une interface moderne, intuitive et personnalisable.
+
+##  Fonctionnalités principales
+- Affichage des produits floraux sous forme de cartes
+- Recherche avec filtre (type, couleur, occasion, prix)
+- Interface multilingue (Français, Arabe, Anglais)
+- Choix du thème (clair, sombre, automatique)
+- Système de gestion des utilisateurs par l’administrateur
+- Barre de navigation inférieure avec onglets (Accueil, Catégories, Favoris, Panier)
+
+## Technologies utilisées
+- **Kotlin** & **Jetpack Compose** 
+- **Android Studio** – Environnement de développement
+- **API-JSON** – Fichier local utilisé pour simuler les données des produits
+- **Git** & **GitHub** – Suivi de version et hébergement du projet
+
+
 
 
 
