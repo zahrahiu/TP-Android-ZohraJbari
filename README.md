@@ -58,10 +58,10 @@ git clone https://github.com/zahrahiu/TP-Android-ZohraJbari.git
 2- Ouvre-le dans Android Studio.  
 
 3-Lance l’application sur un émulateur ou appareil Android.    
-4-Sur un appareil réel :
-   a-Activez le mode développeur
-   b-Activez le débogage USB
-   c-Connectez votre téléphone avec un câble USB  
+4-Sur un appareil réel :  
+   a-Activez le mode développeur  
+   b-Activez le débogage USB  
+   c-Connectez votre téléphone avec un câble USB    
 5-Sélectionnez l’appareil ou l’émulateur dans la barre d’outils Android Studio  
 6-Cliquez sur le bouton Run pour lancer l’application
 
