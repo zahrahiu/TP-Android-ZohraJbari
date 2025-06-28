@@ -17,7 +17,37 @@
 - **API-JSON** – Fichier local utilisé pour simuler les données des produits
 - **Git** & **GitHub** – Suivi de version et hébergement du projet
 
+##  Dépendances principales (`build.gradle`)
 
+```kotlin
 
+val nav_version = "2.8.9"
+    implementation("com.google.dagger:hilt-android:2.56.1")
+    ksp("com.google.dagger:hilt-compiler:2.56.1")
+
+// 🌐 Networking
+implementation("com.squareup.retrofit2:retrofit:2.9.0")
+implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+// 🖼️ UI & Material
+implementation("androidx.compose.ui:ui:1.4.3")
+implementation("androidx.compose.material3:material3:1.2.1")
+implementation("androidx.compose.material3:material3:1.1.0")        // legacy screens
+implementation("androidx.compose.material:material-icons-extended:1.6.1")
+implementation("com.google.accompanist:accompanist-flowlayout:0.31.5-beta")
+
+// 🚦 Navigation
+def nav_version = "2.7.7"
+implementation("androidx.navigation:navigation-compose:$nav_version")
+
+// 💾 DataStore
+implementation("androidx.datastore:datastore-preferences:1.0.0")
+implementation("androidx.datastore:datastore-core:1.0.0")
+
+// 🧩 Dependency Injection
+implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+```
 
 
