@@ -57,11 +57,23 @@ git clone https://github.com/zahrahiu/TP-Android-ZohraJbari.git
 ```
 2- Ouvre-le dans Android Studio.  
 
-3-Lance l’application sur un émulateur ou appareil Android.  
+3-Lance l’application sur un émulateur ou appareil Android.    
+4-Sur un appareil réel :
+   a-Activez le mode développeur
+   b-Activez le débogage USB
+   c-Connectez votre téléphone avec un câble USB  
+5-Sélectionnez l’appareil ou l’émulateur dans la barre d’outils Android Studio  
+6-Cliquez sur le bouton Run pour lancer l’application
+
+
 
 ## Réalisation de l’application
 ### Logo de l'application
 ![image](https://github.com/user-attachments/assets/a891aa1c-5276-4eb3-8c4e-5c17636a89fd)
 ### Page Login
-![image](https://github.com/user-attachments/assets/cb4b95ba-a254-4a1f-951f-c188787021c6)
+Dans cette étape, j’ai conçu l’interface de connexion de l’application Flora en utilisant Jetpack Compose (Kotlin). L’objectif était de proposer une expérience utilisateur simple, élégante et cohérente avec le thème floral de l’application.  
+![image](https://github.com/user-attachments/assets/cb4b95ba-a254-4a1f-951f-c188787021c6)  
+Si l’utilisateur saisit une adresse e mail ou un mot de passe incorrect ,un message d’erreur rouge s’affiche immédiatement sous les champs de saisie  
+
+![image](https://github.com/user-attachments/assets/9b65325e-5249-4714-a327-3eb09b68c9e4)
 
