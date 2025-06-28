@@ -16,7 +16,7 @@
 - **Android Studio** – Environnement de développement
 - **API-JSON** – Fichier local utilisé pour simuler les données des produits
 - **Git** & **GitHub** – Suivi de version et hébergement du projet
-
+- **Hilt**
 ##  Dépendances principales (`build.gradle`)
 
 ```kotlin
