@@ -133,6 +133,119 @@ Voilà, parmi les thèmes existants dans cette application.
 
 ![image](https://github.com/user-attachments/assets/49041567-a8ed-4746-8243-bfe74157b459)![image](https://github.com/user-attachments/assets/e6a1bda2-3515-434b-899d-e9a53f7a0f57)
 
+Lorsqu’on clique sur « Se déconnecter », un message de confirmation apparaît ; si l’utilisateur confirme, il est redirigé vers la page de connexion, sinon il reste sur la même page  
+
+![image](https://github.com/user-attachments/assets/5474950b-446f-4622-b0dd-a38a875791f6)  
+
+### Page categorie 
+
+En cliquant sur « Catégories », l’application ouvre la page listant toutes les catégories ; si l’on sélectionne l’une d’elles, seuls les produits de cette catégorie s’affichent.  
+
+![image](https://github.com/user-attachments/assets/ca544424-a454-462c-af9f-a9e60eb997a9)![image](https://github.com/user-attachments/assets/2e911f2e-cd49-48b9-b51f-fa613268a4a0)  
+
+
+### Page de détails de produits
+
+
+La page de détails présente toutes les informations clés d’un produit : promotion, note en étoiles, stock disponible, description, type, couleur, et un bouton pour l’ajouter au panier. En bas, une section propose des produits similaires pour enrichir l’expérience d’achat.  
+
+![image](https://github.com/user-attachments/assets/a56f4468-596a-4fc8-8ec3-2731bd71ae8b)![image](https://github.com/user-attachments/assets/6b24a7c0-d099-45b3-821d-54f643a6d696)  
+
+
+Lorsqu’un utilisateur clique sur « Ajouter au panier », une pop-up s’ouvre pour proposer des ajouts facultatifs comme du chocolat, un vase ou une peluche. Il peut ajuster les quantités avec « + »/« – ». Cela améliore l’expérience et favorise l’upselling.  
+
+
+![image](https://github.com/user-attachments/assets/5caf1781-8752-49fe-a6f0-42145f79d3b1)  
+
+
+### page de panier d’achat
+
+Le panier affiche le produit choisi avec ses ajouts, les quantités modifiables, le total mis à jour automatiquement, et un bouton pour finaliser la commande.  
+
+![image](https://github.com/user-attachments/assets/1381a0bf-6bee-4d80-84a3-84371a40e9b8)  
+
+
+### Page passer commande 
+
+La page « Passer Commande » guide l’utilisateur en trois étapes : choix du mode de livraison, saisie des coordonnées, et sélection du paiement (carte ou PayPal). Chaque étape est obligatoire, et le total s’ajuste automatiquement. La commande n’est validée que si tous les champs sont correctement remplis.  
+
+
+![image](https://github.com/user-attachments/assets/219f2a5a-1a8e-4d1d-bb58-3be959cc9b5b)![image](https://github.com/user-attachments/assets/9cf350ab-4db3-4cd0-ad80-76ec423a3847)![image](https://github.com/user-attachments/assets/f676a083-4200-45cc-9ccb-193a49d6c3f8)  
+
+
+Une fois le paiement effectué, l’utilisateur reçoit un message de confirmation indiquant que la commande a bien été enregistrée  
+
+
+![image](https://github.com/user-attachments/assets/167dafe1-1109-4b5f-9bac-854012b8224b)  
+
+Une notification s’affiche immédiatement pour informer l’utilisateur que sa commande a été envoyée et qu’il doit attendre la validation de l’administrateur.  
+
+![image](https://github.com/user-attachments/assets/899a1d42-6d8c-48a1-80df-caffce37407c)![image](https://github.com/user-attachments/assets/3594894f-baf9-4e6a-9fd6-39ba51395f8e)  
+
+
+### Page de favoris 
+
+La page Favoris regroupe tous les produits que l’utilisateur a aimés en cliquant sur l’icône  (like)  
+
+![image](https://github.com/user-attachments/assets/dd531e75-c283-476f-95bf-a0b59abc4da2)  
+
+
+### Espace admin 
+
+
+L’administrateur dispose d’une page dédiée où il peut gérer les commandes des utilisateurs.  
+
+
+![image](https://github.com/user-attachments/assets/64beb8af-7515-44f3-a1dc-b197287d1dbe)  
+
+L’administrateur peut effectuer toutes les actions qu’un utilisateur normal  mais il dispose en plus d’un espace d’administration sécurisé pour gérer et valider les commandes.  
+
+![image](https://github.com/user-attachments/assets/841f7d4f-5247-404f-af80-25d649d82e0e)  
+
+#### 1 Gerer users
+
+
+Dans cette interface, chaque nouvel utilisateur qui s'inscrit est automatiquement ajouté à la liste "En attente". L'administrateur a la possibilité de gérer ces utilisateurs en choisissant de les accepter ou de les refuser.  
+
+![image](https://github.com/user-attachments/assets/81df40d3-0005-4895-a982-cc20a158b865)  
+
+
+Dans cette section, on trouve la liste des utilisateurs dont les inscriptions ont été validées par l’administrateur  
+
+
+![image](https://github.com/user-attachments/assets/c67de263-726d-4f7a-8cfa-f7b1856c8c4a)  
+
+
+Lorsqu’un utilisateur dont l’inscription a été refusée par l’administrateur tente de se connecter, un message d’erreur s’affiche  
+
+![image](https://github.com/user-attachments/assets/1b6a9944-0715-4d56-8f7a-cc92db66c18e)   
+
+
+#### 2 Gerer commandes 
+
+Dans l’onglet Commandes, l’administrateur peut consulter les commandes passées par les utilisateurs acceptés.   
+
+
+![image](https://github.com/user-attachments/assets/cd3e871a-930b-4d58-9a00-cc35fb4ca46f)  
+
+
+Si l’admin accepte la commande, l’utilisateur reçoit une notification l’informant que sa commande a été validée.   
+
+![image](https://github.com/user-attachments/assets/c5b56573-44db-41ee-9e9e-a60afdce90a0)  
+
+Lorsqu’un utilisateur clique sur "Voir commande" depuis sa notification, il accède à une page de récapitulatif de commande  
+
+![image](https://github.com/user-attachments/assets/f0b69f8b-33e0-4739-9f76-a78df805524e)  
+
+
+Il peut ensuite accéder à un espace de suivi de commande pour consulter l’état de traitement (en cours, livrée, etc.).    
+
+![image](https://github.com/user-attachments/assets/57471606-40b1-497a-ac08-df2f1d059ddb)  
+
+Une fois la commande livrée avec succès, l'utilisateur reçoit automatiquement un message de confirmation lui indiquant que sa commande a bien été livrée.  
+
+
+![image](https://github.com/user-attachments/assets/ea4509e1-d9f2-460d-9b26-c16b86d986ec)  
 
 
 
