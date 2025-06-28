@@ -10,7 +10,7 @@
     "colors": ["RED"],
     "occasions": ["LOVE"],
     "discountPercent": 15,
-    "offerEnd": 1753144799000,
+    "offerEnd": 1751241599000,
     "category": "GIFT"
   },
   {
@@ -23,7 +23,9 @@
     "type": "TULIP",
     "colors": ["WHITE"],
     "occasions": ["ANNIVERSARY", "WEDDING"],
-    "category": "PANIER"
+    "category": "PANIER",
+    "discountPercent": 50,
+    "offerEnd": 1751241599000
   },
   {
     "productID": "FL011",
@@ -59,7 +61,9 @@
     "type": "PANSY",
     "colors": ["MULTICOLOR"],
     "occasions": ["THANKS", "BIRTHDAY"],
-    "category": "FLOWERS"
+    "category": "FLOWERS",
+    "discountPercent": 20,
+    "offerEnd": 1751241599000
   },
   {
     "productID": "FL014",

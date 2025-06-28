@@ -38,7 +38,7 @@ import com.example.myapplication.data.Repository.UserStatus
 import com.example.myapplication.navigator.Routes
 
 /* ───────── Palette & formes ───────── */
-private val Sauge        = Color(0xFF8BA17E)          // accent principal
+private val Sauge        = Color(0xFFDC4C3E)          // accent principal
 private val BeigeClair   = Color(0xFFFFF8F0)          // fond principal
 private val CardShape    = RoundedCornerShape(24.dp)
 private val RedRefuse    = Color(0xFFE53935)

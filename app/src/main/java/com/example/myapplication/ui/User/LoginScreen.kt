@@ -20,7 +20,7 @@ import com.example.myapplication.data.Repository.UserRepository
 import com.example.myapplication.data.Repository.UserStatus
 import com.example.myapplication.session.SessionManager
 
-val RougeFlora = Color(0xFF989D71)
+val RougeFlora = Color(0xFFDC4C3E)
 val BeigeFlora = Color(0xFFFFF8F0)
 val BeigeBackground = Color(0xFFFFFFFF)
 
