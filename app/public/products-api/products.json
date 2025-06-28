@@ -25,7 +25,8 @@
     "occasions": ["ANNIVERSARY", "WEDDING"],
     "category": "PANIER",
     "discountPercent": 50,
-    "offerEnd": 1751241599000
+    "offerEnd": 1751327999000
+
   },
   {
     "productID": "FL011",
@@ -63,7 +64,7 @@
     "occasions": ["THANKS", "BIRTHDAY"],
     "category": "FLOWERS",
     "discountPercent": 20,
-    "offerEnd": 1751241599000
+    "offerEnd": 1751414399000
   },
   {
     "productID": "FL014",
