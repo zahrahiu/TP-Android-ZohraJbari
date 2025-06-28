@@ -7,7 +7,7 @@
 - Affichage des produits floraux sous forme de cartes
 - Recherche avec filtre (type, couleur, occasion, prix)
 - Interface multilingue (Français, Arabe, Anglais)
-- Choix du thème (clair, sombre, automatique)
+- Choix du thème (clair, sombre, Pastel)
 - Système de gestion des utilisateurs par l’administrateur
 - Barre de navigation inférieure avec onglets (Accueil, Catégories, Favoris, Panier)
 
